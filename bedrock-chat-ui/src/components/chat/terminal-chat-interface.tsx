@@ -28,9 +28,16 @@ export function TerminalChatInterface({
 }: TerminalChatInterfaceProps) {
   const [input, setInput] = useState('')
   const messagesEndRef = useRef<HTMLDivElement>(null)
+  const messagesContainerRef = useRef<HTMLDivElement>(null)
 
   const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
+    if (messagesContainerRef.current) {
+      const container = messagesContainerRef.current
+      container.scrollTo({
+        top: container.scrollHeight,
+        behavior: 'smooth'
+      })
+    }
   }
 
   useEffect(() => {
@@ -70,7 +77,7 @@ export function TerminalChatInterface({
       </div>
 
       {/* Messages Area */}
-      <div className="h-96 overflow-y-auto p-4 bg-black font-mono text-sm">
+      <div ref={messagesContainerRef} className="h-96 overflow-y-auto p-4 bg-black font-mono text-sm">
         {messages.length === 0 ? (
           <div className="text-green-400/70 text-center py-8">
             <Terminal className="h-12 w-12 mx-auto mb-4 text-green-500/50" />

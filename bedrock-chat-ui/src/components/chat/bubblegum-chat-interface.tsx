@@ -28,9 +28,16 @@ export function BubblegumChatInterface({
 }: BubblegumChatInterfaceProps) {
   const [input, setInput] = useState('')
   const messagesEndRef = useRef<HTMLDivElement>(null)
+  const messagesContainerRef = useRef<HTMLDivElement>(null)
 
   const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
+    if (messagesContainerRef.current) {
+      const container = messagesContainerRef.current
+      container.scrollTo({
+        top: container.scrollHeight,
+        behavior: 'smooth'
+      })
+    }
   }
 
   useEffect(() => {
@@ -80,7 +87,7 @@ export function BubblegumChatInterface({
       </div>
 
       {/* Messages Area */}
-      <div className="h-96 overflow-y-auto p-6 bg-gradient-to-b from-pink-25 to-purple-25">
+      <div ref={messagesContainerRef} className="h-96 overflow-y-auto p-6 bg-gradient-to-b from-pink-25 to-purple-25">
         {messages.length === 0 ? (
           <div className="text-center py-12">
             <div className="text-6xl mb-4 animate-bounce">🦄</div>
