@@ -80,10 +80,11 @@ export default function TerminalPage() {
   const selectedKB = knowledgeBases.find(kb => kb.id === selectedKnowledgeBase)
 
   return (
-    <div className="min-h-screen bg-black py-8 px-4">
+    <div className="min-h-screen bg-black py-4 px-4">
       <div className="max-w-6xl mx-auto space-y-6">
-        <div className="text-center mb-8 relative">
-          <div className="absolute top-0 left-0 flex gap-2">
+        {/* Navigation Bar */}
+        <div className="flex justify-between items-center py-4">
+          <div className="flex gap-2">
             <Link href="/">
               <Button variant="outline" size="sm" className="border-green-500/30 text-green-400 hover:bg-green-500/10">
                 <ArrowLeft className="h-4 w-4 mr-2" />
@@ -97,15 +98,17 @@ export default function TerminalPage() {
               </Button>
             </Link>
             <Link href="/medieval">
-              <Button variant="outline" size="sm" className="border-amber-500 text-amber-400 hover:bg-amber-500/10">
+              <Button variant="outline" size="sm" className="border-stone-500 text-stone-400 hover:bg-stone-500/10">
                 <Crown className="h-4 w-4 mr-2" />
                 Medieval
               </Button>
             </Link>
           </div>
-          <div className="absolute top-0 right-0">
-            <ThemeToggle />
-          </div>
+          <ThemeToggle />
+        </div>
+        
+        {/* Main Content */}
+        <div className="text-center mb-8">
           <div className="flex items-center justify-center gap-3 mb-4">
             <Terminal className="h-8 w-8 text-green-400" />
             <h1 className="text-3xl font-bold text-green-400 font-mono">

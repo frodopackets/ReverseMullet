@@ -80,7 +80,7 @@ export default function BubblegumPage() {
   const selectedKB = knowledgeBases.find(kb => kb.id === selectedKnowledgeBase)
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-pink-100 via-purple-100 to-blue-100 py-8 px-4 relative overflow-hidden">
+    <div className="min-h-screen bg-gradient-to-br from-pink-100 via-purple-100 to-blue-100 py-4 px-4 relative overflow-hidden">
       {/* Background decorations */}
       <div className="absolute inset-0 pointer-events-none">
         <div className="absolute top-10 left-10 text-4xl animate-bounce text-pink-300/30" style={{ animationDelay: '0s' }}>🌸</div>
@@ -92,8 +92,9 @@ export default function BubblegumPage() {
       </div>
 
       <div className="max-w-6xl mx-auto space-y-6 relative z-10">
-        <div className="text-center mb-8 relative">
-          <div className="absolute top-0 left-0 flex gap-2">
+        {/* Navigation Bar */}
+        <div className="flex justify-between items-center py-4">
+          <div className="flex gap-2">
             <Link href="/">
               <Button 
                 variant="outline" 
@@ -120,7 +121,7 @@ export default function BubblegumPage() {
               <Button 
                 variant="outline" 
                 size="sm" 
-                className="border-3 border-amber-300 text-amber-600 hover:bg-amber-100 rounded-full shadow-lg font-bold"
+                className="border-3 border-stone-300 text-stone-600 hover:bg-stone-100 rounded-full shadow-lg font-bold"
                 style={{ fontFamily: 'Comic Sans MS, cursive' }}
               >
                 <Crown className="h-4 w-4 mr-2" />
@@ -128,9 +129,11 @@ export default function BubblegumPage() {
               </Button>
             </Link>
           </div>
-          <div className="absolute top-0 right-0">
-            <ThemeToggle />
-          </div>
+          <ThemeToggle />
+        </div>
+        
+        {/* Main Content */}
+        <div className="text-center mb-8">
           
           {/* Main title */}
           <div className="flex items-center justify-center gap-4 mb-4">

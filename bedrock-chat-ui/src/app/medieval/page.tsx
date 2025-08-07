@@ -6,7 +6,7 @@ import { MedievalKnowledgeBaseSelector, KnowledgeBase } from '@/components/chat/
 import { StatusIndicator } from '@/components/chat/status-indicator'
 import { ThemeToggle } from '@/components/ui/theme-toggle'
 import { sendMessage, getKnowledgeBases } from '@/lib/mock-api'
-import { Crown, ArrowLeft, Shield, Sword, Castle } from 'lucide-react'
+import { Crown, ArrowLeft, Shield, Sword, Castle, Terminal, Heart } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import Link from 'next/link'
 
@@ -110,53 +110,78 @@ export default function MedievalPage() {
   const selectedKB = knowledgeBases.find(kb => kb.id === selectedKnowledgeBase)
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-amber-100 via-orange-100 to-red-100 py-8 px-4 relative overflow-hidden">
+    <div className="min-h-screen bg-gradient-to-br from-stone-100 via-slate-100 to-gray-100 py-4 px-4 relative overflow-hidden">
       {/* Background decorations */}
       <div className="absolute inset-0 pointer-events-none">
-        <div className="absolute top-10 left-10 text-6xl animate-bounce text-amber-300/20" style={{ animationDelay: '0s' }}>🏰</div>
-        <div className="absolute top-20 right-20 text-5xl animate-bounce text-amber-300/20" style={{ animationDelay: '0.5s' }}>⚔️</div>
-        <div className="absolute bottom-20 left-20 text-7xl animate-bounce text-amber-300/20" style={{ animationDelay: '1s' }}>🐉</div>
-        <div className="absolute bottom-10 right-10 text-4xl animate-bounce text-amber-300/20" style={{ animationDelay: '1.5s' }}>🛡️</div>
-        <div className="absolute top-1/2 left-5 text-3xl animate-bounce text-amber-300/20" style={{ animationDelay: '2s' }}>👑</div>
-        <div className="absolute top-1/3 right-5 text-5xl animate-bounce text-amber-300/20" style={{ animationDelay: '2.5s' }}>🗡️</div>
+        <div className="absolute top-10 left-10 text-6xl animate-bounce text-stone-300/20" style={{ animationDelay: '0s' }}>🏰</div>
+        <div className="absolute top-20 right-20 text-5xl animate-bounce text-stone-300/20" style={{ animationDelay: '0.5s' }}>⚔️</div>
+        <div className="absolute bottom-20 left-20 text-7xl animate-bounce text-stone-300/20" style={{ animationDelay: '1s' }}>🐉</div>
+        <div className="absolute bottom-10 right-10 text-4xl animate-bounce text-stone-300/20" style={{ animationDelay: '1.5s' }}>🛡️</div>
+        <div className="absolute top-1/2 left-5 text-3xl animate-bounce text-stone-300/20" style={{ animationDelay: '2s' }}>👑</div>
+        <div className="absolute top-1/3 right-5 text-5xl animate-bounce text-stone-300/20" style={{ animationDelay: '2.5s' }}>🗡️</div>
       </div>
 
       <div className="max-w-6xl mx-auto space-y-6 relative z-10">
-        <div className="text-center mb-8 relative">
-          <div className="absolute top-0 left-0">
+        {/* Navigation Bar */}
+        <div className="flex justify-between items-center py-4">
+          <div className="flex gap-2">
             <Link href="/">
               <Button 
                 variant="outline" 
                 size="sm" 
-                className="border-3 border-amber-600 text-amber-800 hover:bg-amber-100 rounded-lg shadow-lg font-bold"
+                className="border-3 border-stone-600 text-stone-800 hover:bg-stone-100 rounded-lg shadow-lg font-bold"
                 style={{ fontFamily: 'serif' }}
               >
                 <ArrowLeft className="h-4 w-4 mr-2" />
                 Return to Main Hall
               </Button>
             </Link>
+            <Link href="/terminal">
+              <Button 
+                variant="outline" 
+                size="sm" 
+                className="border-3 border-green-600 text-green-700 hover:bg-green-100 rounded-lg shadow-lg font-bold"
+                style={{ fontFamily: 'serif' }}
+              >
+                <Terminal className="h-4 w-4 mr-2" />
+                Terminal
+              </Button>
+            </Link>
+            <Link href="/bubblegum">
+              <Button 
+                variant="outline" 
+                size="sm" 
+                className="border-3 border-pink-600 text-pink-700 hover:bg-pink-100 rounded-lg shadow-lg font-bold"
+                style={{ fontFamily: 'serif' }}
+              >
+                <Heart className="h-4 w-4 mr-2" />
+                Bubblegum
+              </Button>
+            </Link>
           </div>
-          <div className="absolute top-0 right-0">
-            <ThemeToggle />
-          </div>
+          <ThemeToggle />
+        </div>
+        
+        {/* Main Content */}
+        <div className="text-center mb-8">
           
           {/* Main title */}
           <div className="flex items-center justify-center gap-4 mb-4">
-            <Castle className="h-12 w-12 text-amber-700 animate-pulse" />
-            <h1 className="text-6xl font-bold bg-gradient-to-r from-amber-700 via-yellow-600 to-amber-700 bg-clip-text text-transparent" style={{ fontFamily: 'serif' }}>
+            <Castle className="h-12 w-12 text-stone-700 animate-pulse" />
+            <h1 className="text-6xl font-bold bg-gradient-to-r from-stone-700 via-slate-600 to-stone-700 bg-clip-text text-transparent" style={{ fontFamily: 'serif' }}>
               Medieval Knowledge Realm
             </h1>
-            <Crown className="h-12 w-12 text-amber-700 animate-pulse" />
+            <Crown className="h-12 w-12 text-stone-700 animate-pulse" />
           </div>
           
-          <p className="text-3xl text-amber-800 mb-4 font-bold" style={{ fontFamily: 'serif' }}>
+          <p className="text-3xl text-stone-800 mb-4 font-bold" style={{ fontFamily: 'serif' }}>
             🏰 Where Ancient Wisdom Meets Noble Seekers 🏰
           </p>
           
           <div className="flex items-center justify-center gap-6 mb-4">
             <StatusIndicator isConnected={true} mode="mock" />
-            <div className="bg-gradient-to-r from-amber-200 to-orange-200 px-4 py-2 rounded-lg border-3 border-amber-500 shadow-lg">
-              <span className="text-amber-800 font-bold text-sm" style={{ fontFamily: 'serif' }}>
+            <div className="bg-gradient-to-r from-stone-200 to-slate-200 px-4 py-2 rounded-lg border-3 border-stone-500 shadow-lg">
+              <span className="text-stone-800 font-bold text-sm" style={{ fontFamily: 'serif' }}>
                 ⚔️ Royal Court Mode Activated! ⚔️
               </span>
             </div>
@@ -164,11 +189,11 @@ export default function MedievalPage() {
 
           {/* Animated medieval elements */}
           <div className="flex justify-center gap-4 text-4xl">
-            <Shield className="text-amber-600 animate-pulse" style={{ animationDelay: '0s' }} />
-            <Sword className="text-amber-600 animate-pulse" style={{ animationDelay: '0.2s' }} />
+            <Shield className="text-stone-600 animate-pulse" style={{ animationDelay: '0s' }} />
+            <Sword className="text-stone-600 animate-pulse" style={{ animationDelay: '0.2s' }} />
             <Crown className="text-amber-600 animate-pulse" style={{ animationDelay: '0.4s' }} />
-            <Castle className="text-amber-600 animate-pulse" style={{ animationDelay: '0.6s' }} />
-            <Shield className="text-amber-600 animate-pulse" style={{ animationDelay: '0.8s' }} />
+            <Castle className="text-stone-600 animate-pulse" style={{ animationDelay: '0.6s' }} />
+            <Shield className="text-stone-600 animate-pulse" style={{ animationDelay: '0.8s' }} />
           </div>
         </div>
 

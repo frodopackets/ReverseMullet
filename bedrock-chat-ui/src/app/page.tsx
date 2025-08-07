@@ -80,10 +80,11 @@ export default function Home() {
   const selectedKB = knowledgeBases.find(kb => kb.id === selectedKnowledgeBase)
 
   return (
-    <div className="min-h-screen bg-background py-8 px-4">
+    <div className="min-h-screen bg-background py-4 px-4">
       <div className="max-w-6xl mx-auto space-y-6">
-        <div className="text-center mb-8 relative">
-          <div className="absolute top-0 left-0 flex gap-2">
+        {/* Navigation Bar */}
+        <div className="flex justify-between items-center py-4">
+          <div className="flex gap-2">
             <Link href="/terminal">
               <Button variant="outline" size="sm">
                 <Terminal className="h-4 w-4 mr-2" />
@@ -97,15 +98,17 @@ export default function Home() {
               </Button>
             </Link>
             <Link href="/medieval">
-              <Button variant="outline" size="sm" className="border-amber-500 text-amber-700 hover:bg-amber-50">
+              <Button variant="outline" size="sm" className="border-stone-500 text-stone-700 hover:bg-stone-50">
                 <Crown className="h-4 w-4 mr-2" />
                 Medieval Mode
               </Button>
             </Link>
           </div>
-          <div className="absolute top-0 right-0">
-            <ThemeToggle />
-          </div>
+          <ThemeToggle />
+        </div>
+        
+        {/* Main Content */}
+        <div className="text-center mb-8">
           <h1 className="text-3xl font-bold text-foreground mb-2">
             Bedrock Knowledge Base Chat
           </h1>
