@@ -1,10 +1,10 @@
 'use client'
 
-import { useState } from 'react'
+import React from 'react'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import { Terminal, Database, CheckCircle, Circle } from 'lucide-react'
+import { Database, CheckCircle, Circle } from 'lucide-react'
 
 export interface KnowledgeBase {
   id: string

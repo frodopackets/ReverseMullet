@@ -88,7 +88,7 @@ export function BubblegumChatInterface({
               Welcome to your magical chat! 
             </h3>
             <p className="text-purple-500 text-lg" style={{ fontFamily: 'Comic Sans MS, cursive' }}>
-              Ask me anything and I'll help you with sparkles! ✨
+              Ask me anything and I&apos;ll help you with sparkles! ✨
             </p>
             <div className="flex justify-center gap-4 mt-4 text-2xl">
               <span className="animate-bounce" style={{ animationDelay: '0.1s' }}>🌈</span>
@@ -100,7 +100,7 @@ export function BubblegumChatInterface({
           </div>
         ) : (
           <div className="space-y-6">
-            {messages.map((message, index) => (
+            {messages.map((message) => (
               <div key={message.id} className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}>
                 <div className={`max-w-xs lg:max-w-md px-4 py-3 rounded-2xl relative ${
                   message.role === 'user' 
