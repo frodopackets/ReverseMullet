@@ -1,19 +1,19 @@
 version: 1
-frontend:
-  phases:
-    preBuild:
-      commands:
-        - cd bedrock-chat-ui
-        - npm ci
-    build:
-      commands:
-        - cd bedrock-chat-ui
-        - npm run build
-  artifacts:
-    baseDirectory: bedrock-chat-ui/out
-    files:
-      - '**/*'
-  cache:
-    paths:
-      - bedrock-chat-ui/node_modules/**/*
-      - bedrock-chat-ui/.next/cache/**/*
+applications:
+  - appRoot: bedrock-chat-ui
+    frontend:
+      phases:
+        preBuild:
+          commands:
+            - npm ci
+        build:
+          commands:
+            - npm run build
+      artifacts:
+        baseDirectory: out
+        files:
+          - '**/*'
+      cache:
+        paths:
+          - node_modules/**/*
+          - .next/cache/**/*
