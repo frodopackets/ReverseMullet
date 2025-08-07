@@ -6,7 +6,7 @@ import { TerminalKnowledgeBaseSelector, KnowledgeBase } from '@/components/chat/
 import { StatusIndicator } from '@/components/chat/status-indicator'
 import { ThemeToggle } from '@/components/ui/theme-toggle'
 import { sendMessage, getKnowledgeBases } from '@/lib/mock-api'
-import { Terminal, ArrowLeft } from 'lucide-react'
+import { Terminal, ArrowLeft, Heart, Crown } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import Link from 'next/link'
 
@@ -83,11 +83,23 @@ export default function TerminalPage() {
     <div className="min-h-screen bg-black py-8 px-4">
       <div className="max-w-6xl mx-auto space-y-6">
         <div className="text-center mb-8 relative">
-          <div className="absolute top-0 left-0">
+          <div className="absolute top-0 left-0 flex gap-2">
             <Link href="/">
               <Button variant="outline" size="sm" className="border-green-500/30 text-green-400 hover:bg-green-500/10">
                 <ArrowLeft className="h-4 w-4 mr-2" />
                 Back to UI Mode
+              </Button>
+            </Link>
+            <Link href="/bubblegum">
+              <Button variant="outline" size="sm" className="border-pink-300 text-pink-400 hover:bg-pink-500/10">
+                <Heart className="h-4 w-4 mr-2" />
+                Bubblegum
+              </Button>
+            </Link>
+            <Link href="/medieval">
+              <Button variant="outline" size="sm" className="border-amber-500 text-amber-400 hover:bg-amber-500/10">
+                <Crown className="h-4 w-4 mr-2" />
+                Medieval
               </Button>
             </Link>
           </div>

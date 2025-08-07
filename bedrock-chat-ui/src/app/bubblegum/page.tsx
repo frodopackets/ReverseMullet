@@ -6,7 +6,7 @@ import { BubblegumKnowledgeBaseSelector, KnowledgeBase } from '@/components/chat
 import { StatusIndicator } from '@/components/chat/status-indicator'
 import { ThemeToggle } from '@/components/ui/theme-toggle'
 import { sendMessage, getKnowledgeBases } from '@/lib/mock-api'
-import { Sparkles, ArrowLeft, Heart, Star } from 'lucide-react'
+import { Sparkles, ArrowLeft, Heart, Star, Terminal, Crown } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import Link from 'next/link'
 
@@ -93,7 +93,7 @@ export default function BubblegumPage() {
 
       <div className="max-w-6xl mx-auto space-y-6 relative z-10">
         <div className="text-center mb-8 relative">
-          <div className="absolute top-0 left-0">
+          <div className="absolute top-0 left-0 flex gap-2">
             <Link href="/">
               <Button 
                 variant="outline" 
@@ -102,7 +102,29 @@ export default function BubblegumPage() {
                 style={{ fontFamily: 'Comic Sans MS, cursive' }}
               >
                 <ArrowLeft className="h-4 w-4 mr-2" />
-                Back to Normal Mode
+                Back to Normal
+              </Button>
+            </Link>
+            <Link href="/terminal">
+              <Button 
+                variant="outline" 
+                size="sm" 
+                className="border-3 border-green-300 text-green-600 hover:bg-green-100 rounded-full shadow-lg font-bold"
+                style={{ fontFamily: 'Comic Sans MS, cursive' }}
+              >
+                <Terminal className="h-4 w-4 mr-2" />
+                Terminal
+              </Button>
+            </Link>
+            <Link href="/medieval">
+              <Button 
+                variant="outline" 
+                size="sm" 
+                className="border-3 border-amber-300 text-amber-600 hover:bg-amber-100 rounded-full shadow-lg font-bold"
+                style={{ fontFamily: 'Comic Sans MS, cursive' }}
+              >
+                <Crown className="h-4 w-4 mr-2" />
+                Medieval
               </Button>
             </Link>
           </div>

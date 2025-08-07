@@ -7,7 +7,7 @@ import { StatusIndicator } from '@/components/chat/status-indicator'
 import { ThemeToggle } from '@/components/ui/theme-toggle'
 import { Button } from '@/components/ui/button'
 import { sendMessage, getKnowledgeBases } from '@/lib/mock-api'
-import { Terminal, Heart } from 'lucide-react'
+import { Terminal, Heart, Crown } from 'lucide-react'
 import Link from 'next/link'
 
 export default function Home() {
@@ -94,6 +94,12 @@ export default function Home() {
               <Button variant="outline" size="sm" className="border-pink-300 text-pink-600 hover:bg-pink-50">
                 <Heart className="h-4 w-4 mr-2" />
                 Bubblegum Mode
+              </Button>
+            </Link>
+            <Link href="/medieval">
+              <Button variant="outline" size="sm" className="border-amber-500 text-amber-700 hover:bg-amber-50">
+                <Crown className="h-4 w-4 mr-2" />
+                Medieval Mode
               </Button>
             </Link>
           </div>

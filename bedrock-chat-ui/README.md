@@ -4,13 +4,18 @@ A modern, responsive chat interface built with Next.js and shadcn/ui components 
 
 ## Features
 
-- 🎨 Modern UI with shadcn/ui components
-- 💬 Real-time chat interface
-- 📚 Multiple knowledge base support
-- 🔄 Knowledge base switching
-- 📱 Responsive design
+- 🎨 **Multiple Themed Interfaces**:
+  - **Professional UI** - Clean, modern interface for business use
+  - **Terminal Mode** - Retro terminal aesthetic for developers  
+  - **Bubblegum Mode** - Colorful, playful design for younger users
+  - **Medieval Mode** - Dragons, castles, and sorcery themed interface
+- 💬 Real-time chat interface with smooth scrolling
+- 📚 Multiple knowledge base support with visual selector
+- 🔄 Easy knowledge base switching
+- 📱 Fully responsive design
 - 🎭 Mock backend for development and testing
 - 🚀 Ready for AWS Bedrock integration
+- ⚡ Static export ready for AWS Amplify deployment
 
 ## Tech Stack
 
@@ -47,6 +52,17 @@ npm run dev
 ```
 
 4. Open [http://localhost:3000](http://localhost:3000) in your browser.
+
+## Theme Access
+
+The application includes four distinct themed interfaces:
+
+- **Professional UI**: `http://localhost:3000/` - Clean, modern interface
+- **Terminal Mode**: `http://localhost:3000/terminal` - Retro terminal aesthetic  
+- **Bubblegum Mode**: `http://localhost:3000/bubblegum` - Colorful, playful design
+- **Medieval Mode**: `http://localhost:3000/medieval` - Dragons, castles, and sorcery theme
+
+Each theme maintains the same functionality with unique visual styling and personality.
 
 ## Project Structure
 
