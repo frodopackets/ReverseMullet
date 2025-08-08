@@ -169,6 +169,10 @@ resource "aws_api_gateway_method" "chat_post" {
   resource_id   = aws_api_gateway_resource.chat_resource.id
   http_method   = "POST"
   authorization = "NONE"
+  
+  request_parameters = {
+    "method.request.header.Content-Type" = false
+  }
 }
 
 # API Gateway Methods - Chat OPTIONS (CORS)
@@ -196,6 +200,11 @@ resource "aws_api_gateway_integration" "chat_post_integration" {
   integration_http_method = "POST"
   type                   = "AWS_PROXY"
   uri                    = aws_lambda_function.chat_function.invoke_arn
+  content_handling       = "CONVERT_TO_TEXT"
+  timeout_milliseconds   = 29000
+  
+  # Ensure request body is passed through
+  passthrough_behavior = "WHEN_NO_MATCH"
 }
 
 # API Gateway Integrations - Chat OPTIONS (CORS)
@@ -281,6 +290,16 @@ resource "aws_api_gateway_deployment" "bedrock_api_deployment" {
 
   rest_api_id = aws_api_gateway_rest_api.bedrock_api.id
   stage_name  = var.environment
+  
+  # Force redeployment when integration changes
+  triggers = {
+    redeployment = sha1(jsonencode([
+      aws_api_gateway_integration.chat_post_integration.content_handling,
+      aws_api_gateway_integration.chat_post_integration.timeout_milliseconds,
+      aws_api_gateway_integration.chat_post_integration.passthrough_behavior,
+      aws_api_gateway_method.chat_post.request_parameters,
+    ]))
+  }
 }
 
 # Outputs
