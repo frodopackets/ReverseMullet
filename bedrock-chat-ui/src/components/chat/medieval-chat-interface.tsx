@@ -86,6 +86,13 @@ export function MedievalChatInterface({
               </span>
             </div>
           )}
+          {!selectedKnowledgeBase && (
+            <div className="text-center">
+              <span className="bg-stone-900/50 text-amber-200 px-4 py-1 rounded-full text-sm font-medium backdrop-blur-sm border border-amber-600">
+                🏰 Royal Nova Lite Court Active! 🏰
+              </span>
+            </div>
+          )}
           {/* Decorative elements */}
           <div className="absolute top-4 left-4 text-amber-400/60 text-2xl">🗡️</div>
           <div className="absolute top-6 right-6 text-amber-400/60 text-2xl">🛡️</div>

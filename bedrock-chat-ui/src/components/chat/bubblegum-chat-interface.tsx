@@ -79,6 +79,13 @@ export function BubblegumChatInterface({
             </span>
           </div>
         )}
+        {!selectedKnowledgeBase && (
+          <div className="text-center mt-2">
+            <span className="bg-white/30 text-white px-3 py-1 rounded-full text-sm font-medium backdrop-blur-sm">
+              💖 Direct Nova Lite Magic Active! 💖
+            </span>
+          </div>
+        )}
         {/* Floating decorations */}
         <div className="absolute top-2 left-4 text-white/60 animate-bounce" style={{ animationDelay: '0.5s' }}>⭐</div>
         <div className="absolute top-4 right-8 text-white/60 animate-bounce" style={{ animationDelay: '1s' }}>🌟</div>

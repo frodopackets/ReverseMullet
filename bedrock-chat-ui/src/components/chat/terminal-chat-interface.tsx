@@ -67,7 +67,7 @@ export function TerminalChatInterface({
       <div className="flex items-center gap-2 p-3 border-b border-green-500/30 bg-gray-900">
         <Terminal className="h-4 w-4 text-green-400" />
         <span className="text-green-400 font-mono text-sm">
-          bedrock-kb-chat@aws:~$ 
+          bedrock-nova-lite@aws:~$ 
           {selectedKnowledgeBase && (
             <span className="text-green-300 ml-2">
               connected to [{selectedKnowledgeBase}]
@@ -85,7 +85,7 @@ export function TerminalChatInterface({
             <p className="text-green-400/60 text-xs mt-2">
               {selectedKnowledgeBase 
                 ? `Connected to knowledge base: ${selectedKnowledgeBase}`
-                : 'No knowledge base selected'
+                : 'Direct Nova Lite connection active'
               }
             </p>
           </div>
