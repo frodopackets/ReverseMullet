@@ -53,7 +53,9 @@ export function MedievalChatInterface({
   }
 
   const formatTimestamp = (timestamp: Date) => {
-    return timestamp.toLocaleTimeString('en-US', { 
+    // Ensure timestamp is a Date object
+    const date = timestamp instanceof Date ? timestamp : new Date(timestamp)
+    return date.toLocaleTimeString('en-US', { 
       hour12: false,
       hour: '2-digit',
       minute: '2-digit'

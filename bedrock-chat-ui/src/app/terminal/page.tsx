@@ -41,7 +41,12 @@ export default function TerminalPage() {
       }
 
       const assistantMessage = await response.json()
-      setMessages(prev => [...prev, assistantMessage])
+      // Convert timestamp string back to Date object
+      const messageWithDateTimestamp = {
+        ...assistantMessage,
+        timestamp: new Date(assistantMessage.timestamp)
+      }
+      setMessages(prev => [...prev, messageWithDateTimestamp])
     } catch (error) {
       console.error('Failed to send message:', error)
       // Add error message

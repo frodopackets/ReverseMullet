@@ -44,7 +44,8 @@ export default function MedievalPage() {
       // Transform the response to be more medieval
       const medievalResponse = {
         ...assistantMessage,
-        content: transformToMedieval(assistantMessage.content)
+        content: transformToMedieval(assistantMessage.content),
+        timestamp: new Date(assistantMessage.timestamp)
       }
       setMessages(prev => [...prev, medievalResponse])
     } catch (error) {

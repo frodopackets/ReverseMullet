@@ -53,7 +53,9 @@ export function BubblegumChatInterface({
   }
 
   const formatTimestamp = (timestamp: Date) => {
-    return timestamp.toLocaleTimeString('en-US', { 
+    // Ensure timestamp is a Date object
+    const date = timestamp instanceof Date ? timestamp : new Date(timestamp)
+    return date.toLocaleTimeString('en-US', { 
       hour12: true,
       hour: 'numeric',
       minute: '2-digit'
