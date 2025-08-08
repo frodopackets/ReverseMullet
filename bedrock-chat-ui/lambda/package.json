@@ -1,0 +1,12 @@
+{
+  "name": "bedrock-lambda-functions",
+  "version": "1.0.0",
+  "description": "Lambda functions for Bedrock Nova Lite integration",
+  "main": "chat-handler.js",
+  "dependencies": {
+    "@aws-sdk/client-bedrock-runtime": "^3.705.0"
+  },
+  "scripts": {
+    "install": "npm install"
+  }
+}

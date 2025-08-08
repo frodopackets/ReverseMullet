@@ -119,6 +119,24 @@ jspm_packages/
 .aws/
 aws-credentials.json
 
+# Terraform files
+terraform/.terraform/
+terraform/.terraform.lock.hcl
+terraform/terraform.tfstate
+terraform/terraform.tfstate.backup
+terraform/lambda-deployment.zip
+*.tfplan
+*.tfstate
+*.tfstate.*
+
+# Lambda deployment packages
+lambda-deployment.zip
+lambda-deployment.tar.gz
+
+# Test files (temporary)
+test-bedrock.js
+create-lambda-zip.py
+
 # Temporary files
 tmp/
 temp/

@@ -1,0 +1,41 @@
+{
+    "apps": [
+        {
+            "appId": "d1uq2rdehqninx",
+            "appArn": "arn:aws:amplify:us-east-1:723648924038:apps/d1uq2rdehqninx",
+            "name": "ReverseMullet",
+            "tags": {},
+            "repository": "https://github.com/frodopackets/ReverseMullet",
+            "platform": "WEB",
+            "createTime": "2025-08-07T02:09:24.315000-04:00",
+            "updateTime": "2025-08-07T02:09:24.315000-04:00",
+            "defaultDomain": "d1uq2rdehqninx.amplifyapp.com",
+            "enableBranchAutoBuild": false,
+            "enableBranchAutoDeletion": false,
+            "enableBasicAuth": false,
+            "customRules": [
+                {
+                    "source": "/<*>",
+                    "target": "/index.html",
+                    "status": "404-200"
+                }
+            ],
+            "productionBranch": {
+                "lastDeployTime": "2025-08-07T13:04:44.855000-04:00",
+                "status": "SUCCEED",
+                "branchName": "main"
+            },
+            "buildSpec": "version: 1\r\nfrontend:\r\n  phases:\r\n    preBuild:\r\n      commands:\r\n        - cd bedrock-chat-ui\r\n        - npm ci\r\n    build:\r\n      commands:\r\n        - cd bedrock-chat-ui\r\n        - npm run build\r\n  artifacts:\r\n    baseDirectory: bedrock-chat-ui/out\r\n    files:\r\n      - '**/*'\r\n  cache:\r\n    paths:\r\n      - bedrock-chat-ui/node_modules/**/*\r\n      - bedrock-chat-ui/.next/cache/**/*",
+            "customHeaders": "",
+            "enableAutoBranchCreation": false,
+            "repositoryCloneMethod": "TOKEN",
+            "cacheConfig": {
+                "type": "AMPLIFY_MANAGED_NO_COOKIES"
+            },
+            "webhookCreateTime": "2025-08-07T02:09:24.087000-04:00",
+            "jobConfig": {
+                "buildComputeType": "STANDARD_8GB"
+            }
+        }
+    ]
+}
