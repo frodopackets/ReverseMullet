@@ -26,8 +26,8 @@ export default function BubblegumPage() {
 
     try {
       // Send message to API endpoint
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL
-      const endpoint = apiUrl ? `${apiUrl}/chat` : '/api/chat'
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://r2r3oacvc3.execute-api.us-east-1.amazonaws.com/dev'
+      const endpoint = `${apiUrl}/chat`
       const response = await fetch(endpoint, {
         method: 'POST',
         headers: {

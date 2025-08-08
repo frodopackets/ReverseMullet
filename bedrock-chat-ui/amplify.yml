@@ -8,6 +8,7 @@ frontend:
     build:
       commands:
         - cd bedrock-chat-ui
+        - echo "Building with API URL: $NEXT_PUBLIC_API_URL"
         - npm run build
   artifacts:
     baseDirectory: bedrock-chat-ui/out
