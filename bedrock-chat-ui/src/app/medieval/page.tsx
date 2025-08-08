@@ -1,46 +1,18 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { MedievalChatInterface, Message } from '@/components/chat/medieval-chat-interface'
-import { MedievalKnowledgeBaseSelector, KnowledgeBase } from '@/components/chat/medieval-knowledge-base-selector'
 import { StatusIndicator } from '@/components/chat/status-indicator'
 import { ThemeToggle } from '@/components/ui/theme-toggle'
-import { sendMessage, getKnowledgeBases } from '@/lib/mock-api'
 import { Crown, ArrowLeft, Shield, Sword, Castle, Terminal, Heart } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import Link from 'next/link'
 
 export default function MedievalPage() {
   const [messages, setMessages] = useState<Message[]>([])
-  const [knowledgeBases, setKnowledgeBases] = useState<KnowledgeBase[]>([])
-  const [selectedKnowledgeBase, setSelectedKnowledgeBase] = useState<string>('')
   const [isLoading, setIsLoading] = useState(false)
 
-  useEffect(() => {
-    // Load knowledge bases on component mount
-    const loadKnowledgeBases = async () => {
-      try {
-        const kbs = await getKnowledgeBases()
-        setKnowledgeBases(kbs)
-        // Auto-select the first active knowledge base
-        const firstActive = kbs.find(kb => kb.status === 'active')
-        if (firstActive) {
-          setSelectedKnowledgeBase(firstActive.id)
-        }
-      } catch (error) {
-        console.error('Failed to load knowledge bases:', error)
-      }
-    }
-
-    loadKnowledgeBases()
-  }, [])
-
   const handleSendMessage = async (content: string) => {
-    if (!selectedKnowledgeBase) {
-      alert('Pray tell, select thy sacred scrolls first! ⚔️')
-      return
-    }
-
     // Add user message
     const userMessage: Message = {
       id: `user-${Date.now()}`,
@@ -53,8 +25,22 @@ export default function MedievalPage() {
     setIsLoading(true)
 
     try {
-      // Get AI response
-      const assistantMessage = await sendMessage(content, selectedKnowledgeBase)
+      // Send message to API endpoint
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL
+      const endpoint = apiUrl ? `${apiUrl}/chat` : '/api/chat'
+      const response = await fetch(endpoint, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ message: content }),
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to get response from API')
+      }
+
+      const assistantMessage = await response.json()
       // Transform the response to be more medieval
       const medievalResponse = {
         ...assistantMessage,
@@ -169,20 +155,20 @@ export default function MedievalPage() {
           <div className="flex items-center justify-center gap-4 mb-4">
             <Castle className="h-12 w-12 text-stone-700 animate-pulse" />
             <h1 className="text-6xl font-bold bg-gradient-to-r from-stone-700 via-slate-600 to-stone-700 bg-clip-text text-transparent" style={{ fontFamily: 'serif' }}>
-              Medieval Knowledge Realm
+              Medieval Nova Lite Realm
             </h1>
             <Crown className="h-12 w-12 text-stone-700 animate-pulse" />
           </div>
           
           <p className="text-3xl text-stone-800 mb-4 font-bold" style={{ fontFamily: 'serif' }}>
-            🏰 Where Ancient Wisdom Meets Noble Seekers 🏰
+            🏰 Where Nova Lite's Wisdom Serves Noble Seekers 🏰
           </p>
           
           <div className="flex items-center justify-center gap-6 mb-4">
-            <StatusIndicator isConnected={true} mode="mock" />
+            <StatusIndicator isConnected={true} mode="bedrock" />
             <div className="bg-gradient-to-r from-stone-200 to-slate-200 px-4 py-2 rounded-lg border-3 border-stone-500 shadow-lg">
               <span className="text-stone-800 font-bold text-sm" style={{ fontFamily: 'serif' }}>
-                ⚔️ Royal Court Mode Activated! ⚔️
+                ⚔️ Nova Lite Royal Court Activated! ⚔️
               </span>
             </div>
           </div>
@@ -201,13 +187,6 @@ export default function MedievalPage() {
           messages={messages}
           onSendMessage={handleSendMessage}
           isLoading={isLoading}
-          selectedKnowledgeBase={selectedKB?.name}
-        />
-
-        <MedievalKnowledgeBaseSelector
-          knowledgeBases={knowledgeBases}
-          selectedKnowledgeBase={selectedKnowledgeBase}
-          onSelect={handleKnowledgeBaseSelect}
         />
       </div>
     </div>

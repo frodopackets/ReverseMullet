@@ -1,46 +1,18 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { TerminalChatInterface, Message } from '@/components/chat/terminal-chat-interface'
-import { TerminalKnowledgeBaseSelector, KnowledgeBase } from '@/components/chat/terminal-knowledge-base-selector'
 import { StatusIndicator } from '@/components/chat/status-indicator'
 import { ThemeToggle } from '@/components/ui/theme-toggle'
-import { sendMessage, getKnowledgeBases } from '@/lib/mock-api'
 import { Terminal, ArrowLeft, Heart, Crown } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import Link from 'next/link'
 
 export default function TerminalPage() {
   const [messages, setMessages] = useState<Message[]>([])
-  const [knowledgeBases, setKnowledgeBases] = useState<KnowledgeBase[]>([])
-  const [selectedKnowledgeBase, setSelectedKnowledgeBase] = useState<string>('')
   const [isLoading, setIsLoading] = useState(false)
 
-  useEffect(() => {
-    // Load knowledge bases on component mount
-    const loadKnowledgeBases = async () => {
-      try {
-        const kbs = await getKnowledgeBases()
-        setKnowledgeBases(kbs)
-        // Auto-select the first active knowledge base
-        const firstActive = kbs.find(kb => kb.status === 'active')
-        if (firstActive) {
-          setSelectedKnowledgeBase(firstActive.id)
-        }
-      } catch (error) {
-        console.error('Failed to load knowledge bases:', error)
-      }
-    }
-
-    loadKnowledgeBases()
-  }, [])
-
   const handleSendMessage = async (content: string) => {
-    if (!selectedKnowledgeBase) {
-      alert('Please select a knowledge base first')
-      return
-    }
-
     // Add user message
     const userMessage: Message = {
       id: `user-${Date.now()}`,
@@ -53,15 +25,29 @@ export default function TerminalPage() {
     setIsLoading(true)
 
     try {
-      // Get AI response
-      const assistantMessage = await sendMessage(content, selectedKnowledgeBase)
+      // Send message to API endpoint
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL
+      const endpoint = apiUrl ? `${apiUrl}/chat` : '/api/chat'
+      const response = await fetch(endpoint, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ message: content }),
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to get response from API')
+      }
+
+      const assistantMessage = await response.json()
       setMessages(prev => [...prev, assistantMessage])
     } catch (error) {
       console.error('Failed to send message:', error)
       // Add error message
       const errorMessage: Message = {
         id: `error-${Date.now()}`,
-        content: 'ERROR: Connection to knowledge base failed. Please try again.',
+        content: 'ERROR: Connection to Nova Lite failed. Please try again.',
         role: 'assistant',
         timestamp: new Date()
       }
@@ -70,14 +56,6 @@ export default function TerminalPage() {
       setIsLoading(false)
     }
   }
-
-  const handleKnowledgeBaseSelect = (knowledgeBaseId: string) => {
-    setSelectedKnowledgeBase(knowledgeBaseId)
-    // Clear messages when switching knowledge bases
-    setMessages([])
-  }
-
-  const selectedKB = knowledgeBases.find(kb => kb.id === selectedKnowledgeBase)
 
   return (
     <div className="min-h-screen bg-black py-4 px-4">
@@ -112,16 +90,16 @@ export default function TerminalPage() {
           <div className="flex items-center justify-center gap-3 mb-4">
             <Terminal className="h-8 w-8 text-green-400" />
             <h1 className="text-3xl font-bold text-green-400 font-mono">
-              bedrock-kb-terminal
+              bedrock-nova-lite-terminal
             </h1>
           </div>
           <p className="text-green-500/70 mb-4 font-mono text-sm">
-            AWS Bedrock Knowledge Base Terminal Interface v1.0.0
+            AWS Bedrock Nova Lite Terminal Interface v1.0.0
           </p>
           <div className="flex items-center justify-center gap-4">
-            <StatusIndicator isConnected={true} mode="mock" />
+            <StatusIndicator isConnected={true} mode="bedrock" />
             <span className="text-green-500/60 font-mono text-xs">
-              [MOCK MODE] - Simulated responses enabled
+              [NOVA LITE] - Direct Bedrock connection active
             </span>
           </div>
         </div>
@@ -130,13 +108,6 @@ export default function TerminalPage() {
           messages={messages}
           onSendMessage={handleSendMessage}
           isLoading={isLoading}
-          selectedKnowledgeBase={selectedKB?.name}
-        />
-
-        <TerminalKnowledgeBaseSelector
-          knowledgeBases={knowledgeBases}
-          selectedKnowledgeBase={selectedKnowledgeBase}
-          onSelect={handleKnowledgeBaseSelect}
         />
       </div>
     </div>

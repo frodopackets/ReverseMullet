@@ -1,46 +1,18 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { BubblegumChatInterface, Message } from '@/components/chat/bubblegum-chat-interface'
-import { BubblegumKnowledgeBaseSelector, KnowledgeBase } from '@/components/chat/bubblegum-knowledge-base-selector'
 import { StatusIndicator } from '@/components/chat/status-indicator'
 import { ThemeToggle } from '@/components/ui/theme-toggle'
-import { sendMessage, getKnowledgeBases } from '@/lib/mock-api'
 import { Sparkles, ArrowLeft, Heart, Star, Terminal, Crown } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import Link from 'next/link'
 
 export default function BubblegumPage() {
   const [messages, setMessages] = useState<Message[]>([])
-  const [knowledgeBases, setKnowledgeBases] = useState<KnowledgeBase[]>([])
-  const [selectedKnowledgeBase, setSelectedKnowledgeBase] = useState<string>('')
   const [isLoading, setIsLoading] = useState(false)
 
-  useEffect(() => {
-    // Load knowledge bases on component mount
-    const loadKnowledgeBases = async () => {
-      try {
-        const kbs = await getKnowledgeBases()
-        setKnowledgeBases(kbs)
-        // Auto-select the first active knowledge base
-        const firstActive = kbs.find(kb => kb.status === 'active')
-        if (firstActive) {
-          setSelectedKnowledgeBase(firstActive.id)
-        }
-      } catch (error) {
-        console.error('Failed to load knowledge bases:', error)
-      }
-    }
-
-    loadKnowledgeBases()
-  }, [])
-
   const handleSendMessage = async (content: string) => {
-    if (!selectedKnowledgeBase) {
-      alert('Please pick a magical library first! 🌟')
-      return
-    }
-
     // Add user message
     const userMessage: Message = {
       id: `user-${Date.now()}`,
@@ -53,8 +25,22 @@ export default function BubblegumPage() {
     setIsLoading(true)
 
     try {
-      // Get AI response
-      const assistantMessage = await sendMessage(content, selectedKnowledgeBase)
+      // Send message to API endpoint
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL
+      const endpoint = apiUrl ? `${apiUrl}/chat` : '/api/chat'
+      const response = await fetch(endpoint, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ message: content }),
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to get response from API')
+      }
+
+      const assistantMessage = await response.json()
       setMessages(prev => [...prev, assistantMessage])
     } catch (error) {
       console.error('Failed to send message:', error)
@@ -70,14 +56,6 @@ export default function BubblegumPage() {
       setIsLoading(false)
     }
   }
-
-  const handleKnowledgeBaseSelect = (knowledgeBaseId: string) => {
-    setSelectedKnowledgeBase(knowledgeBaseId)
-    // Clear messages when switching knowledge bases
-    setMessages([])
-  }
-
-  const selectedKB = knowledgeBases.find(kb => kb.id === selectedKnowledgeBase)
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-pink-100 via-purple-100 to-blue-100 py-4 px-4 relative overflow-hidden">
@@ -145,14 +123,14 @@ export default function BubblegumPage() {
           </div>
           
           <p className="text-2xl text-purple-600 mb-4 font-bold" style={{ fontFamily: 'Comic Sans MS, cursive' }}>
-            🦄 Where dreams and knowledge come together! 🦄
+            🦄 Direct connection to Nova Lite magic! 🦄
           </p>
           
           <div className="flex items-center justify-center gap-6 mb-4">
-            <StatusIndicator isConnected={true} mode="mock" />
+            <StatusIndicator isConnected={true} mode="bedrock" />
             <div className="bg-gradient-to-r from-pink-200 to-purple-200 px-4 py-2 rounded-full border-2 border-pink-300 shadow-lg">
               <span className="text-purple-700 font-bold text-sm" style={{ fontFamily: 'Comic Sans MS, cursive' }}>
-                ✨ Magic Mode Activated! ✨
+                ✨ Nova Lite Magic Activated! ✨
               </span>
             </div>
           </div>
@@ -171,13 +149,6 @@ export default function BubblegumPage() {
           messages={messages}
           onSendMessage={handleSendMessage}
           isLoading={isLoading}
-          selectedKnowledgeBase={selectedKB?.name}
-        />
-
-        <BubblegumKnowledgeBaseSelector
-          knowledgeBases={knowledgeBases}
-          selectedKnowledgeBase={selectedKnowledgeBase}
-          onSelect={handleKnowledgeBaseSelect}
         />
       </div>
     </div>
