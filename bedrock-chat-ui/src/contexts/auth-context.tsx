@@ -5,11 +5,18 @@ import { Amplify } from 'aws-amplify';
 import { getCurrentUser, signOut, fetchAuthSession } from 'aws-amplify/auth';
 
 // Configure Amplify
+const userPoolId = process.env.NEXT_PUBLIC_COGNITO_USER_POOL_ID;
+const userPoolClientId = process.env.NEXT_PUBLIC_COGNITO_USER_POOL_CLIENT_ID;
+
+if (!userPoolId || !userPoolClientId) {
+  console.error('Cognito configuration missing:', { userPoolId, userPoolClientId });
+}
+
 Amplify.configure({
   Auth: {
     Cognito: {
-      userPoolId: process.env.NEXT_PUBLIC_COGNITO_USER_POOL_ID || '',
-      userPoolClientId: process.env.NEXT_PUBLIC_COGNITO_USER_POOL_CLIENT_ID || '',
+      userPoolId: userPoolId || 'us-east-1_MYDJcCcnR',
+      userPoolClientId: userPoolClientId || 'onearv9g4ruj8vhhe7as2ceja',
       loginWith: {
         email: true,
       },
