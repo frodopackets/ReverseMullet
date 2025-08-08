@@ -9,6 +9,10 @@ terraform {
       source  = "hashicorp/archive"
       version = "~> 2.0"
     }
+    random = {
+      source  = "hashicorp/random"
+      version = "~> 3.0"
+    }
   }
 }
 
@@ -37,6 +41,107 @@ variable "project_name" {
 
 # Data sources
 data "aws_caller_identity" "current" {}
+
+# Cognito User Pool
+resource "aws_cognito_user_pool" "bedrock_chat_pool" {
+  name = "${var.project_name}-user-pool-${var.environment}"
+
+  # Password policy
+  password_policy {
+    minimum_length    = 8
+    require_lowercase = true
+    require_numbers   = true
+    require_symbols   = true
+    require_uppercase = true
+  }
+
+  # User attributes
+  username_attributes = ["email"]
+  
+  # Auto-verified attributes
+  auto_verified_attributes = ["email"]
+
+  # Account recovery
+  account_recovery_setting {
+    recovery_mechanism {
+      name     = "verified_email"
+      priority = 1
+    }
+  }
+
+  # Email configuration
+  email_configuration {
+    email_sending_account = "COGNITO_DEFAULT"
+  }
+
+  # User pool add-ons
+  user_pool_add_ons {
+    advanced_security_mode = "OFF"
+  }
+
+  tags = {
+    Environment = var.environment
+    Project     = var.project_name
+  }
+}
+
+# Cognito User Pool Client
+resource "aws_cognito_user_pool_client" "bedrock_chat_client" {
+  name         = "${var.project_name}-client-${var.environment}"
+  user_pool_id = aws_cognito_user_pool.bedrock_chat_pool.id
+
+  # Client settings
+  generate_secret = false
+  
+  # OAuth settings
+  allowed_oauth_flows                  = ["code"]
+  allowed_oauth_flows_user_pool_client = true
+  allowed_oauth_scopes                 = ["email", "openid", "profile"]
+  
+  # Callback URLs (update these with your actual domain)
+  callback_urls = [
+    "http://localhost:3000",
+    "https://main.d1tq2relshaprns.amplifyapp.com"
+  ]
+  
+  logout_urls = [
+    "http://localhost:3000",
+    "https://main.d1tq2relshaprns.amplifyapp.com"
+  ]
+
+  # Token validity (in minutes for access/id tokens, days for refresh)
+  access_token_validity  = 60    # 1 hour
+  id_token_validity     = 60    # 1 hour
+  refresh_token_validity = 30   # 30 days
+  
+  token_validity_units {
+    access_token  = "minutes"
+    id_token      = "minutes"
+    refresh_token = "days"
+  }
+
+  # Prevent user existence errors
+  prevent_user_existence_errors = "ENABLED"
+
+  # Explicit auth flows
+  explicit_auth_flows = [
+    "ALLOW_USER_SRP_AUTH",
+    "ALLOW_REFRESH_TOKEN_AUTH"
+  ]
+}
+
+# Cognito User Pool Domain
+resource "aws_cognito_user_pool_domain" "bedrock_chat_domain" {
+  domain       = "${var.project_name}-${var.environment}-${random_string.domain_suffix.result}"
+  user_pool_id = aws_cognito_user_pool.bedrock_chat_pool.id
+}
+
+# Random string for unique domain
+resource "random_string" "domain_suffix" {
+  length  = 8
+  special = false
+  upper   = false
+}
 
 # IAM Role for Lambda
 resource "aws_iam_role" "lambda_role" {
@@ -163,15 +268,26 @@ resource "aws_api_gateway_resource" "health_resource" {
   path_part   = "health"
 }
 
+# API Gateway Authorizer
+resource "aws_api_gateway_authorizer" "cognito_authorizer" {
+  name                   = "${var.project_name}-cognito-authorizer-${var.environment}"
+  rest_api_id           = aws_api_gateway_rest_api.bedrock_api.id
+  type                  = "COGNITO_USER_POOLS"
+  provider_arns         = [aws_cognito_user_pool.bedrock_chat_pool.arn]
+  identity_source       = "method.request.header.Authorization"
+}
+
 # API Gateway Methods - Chat POST
 resource "aws_api_gateway_method" "chat_post" {
   rest_api_id   = aws_api_gateway_rest_api.bedrock_api.id
   resource_id   = aws_api_gateway_resource.chat_resource.id
   http_method   = "POST"
-  authorization = "NONE"
+  authorization = "COGNITO_USER_POOLS"
+  authorizer_id = aws_api_gateway_authorizer.cognito_authorizer.id
   
   request_parameters = {
     "method.request.header.Content-Type" = false
+    "method.request.header.Authorization" = true
   }
 }
 
@@ -316,4 +432,19 @@ output "chat_endpoint" {
 output "health_endpoint" {
   description = "Health Check Endpoint"
   value       = "https://${aws_api_gateway_rest_api.bedrock_api.id}.execute-api.${var.aws_region}.amazonaws.com/${var.environment}/health"
+}
+
+output "cognito_user_pool_id" {
+  description = "Cognito User Pool ID"
+  value       = aws_cognito_user_pool.bedrock_chat_pool.id
+}
+
+output "cognito_user_pool_client_id" {
+  description = "Cognito User Pool Client ID"
+  value       = aws_cognito_user_pool_client.bedrock_chat_client.id
+}
+
+output "cognito_domain" {
+  description = "Cognito Hosted UI Domain"
+  value       = "https://${aws_cognito_user_pool_domain.bedrock_chat_domain.domain}.auth.${var.aws_region}.amazoncognito.com"
 }

@@ -4,13 +4,15 @@ import { useState } from 'react'
 import { BubblegumChatInterface, Message } from '@/components/chat/bubblegum-chat-interface'
 import { StatusIndicator } from '@/components/chat/status-indicator'
 import { ThemeToggle } from '@/components/ui/theme-toggle'
-import { Sparkles, ArrowLeft, Heart, Star, Terminal, Crown } from 'lucide-react'
+import { Sparkles, ArrowLeft, Heart, Star, Terminal, Crown, LogOut, User } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import Link from 'next/link'
+import { useAuth } from '@/contexts/auth-context'
 
 export default function BubblegumPage() {
   const [messages, setMessages] = useState<Message[]>([])
   const [isLoading, setIsLoading] = useState(false)
+  const { user, signOut, getAuthToken } = useAuth()
 
   const handleSendMessage = async (content: string) => {
     // Add user message
@@ -25,6 +27,12 @@ export default function BubblegumPage() {
     setIsLoading(true)
 
     try {
+      // Get auth token
+      const authToken = await getAuthToken()
+      if (!authToken) {
+        throw new Error('No authentication token available')
+      }
+
       // Send message to API endpoint
       const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://r2r3oacvc3.execute-api.us-east-1.amazonaws.com/dev'
       const endpoint = `${apiUrl}/chat`
@@ -32,6 +40,7 @@ export default function BubblegumPage() {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${authToken}`,
         },
         body: JSON.stringify({ message: content }),
       })

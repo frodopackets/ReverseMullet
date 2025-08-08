@@ -5,12 +5,14 @@ import { SimpleChatInterface, Message } from '@/components/chat/simple-chat-inte
 import { StatusIndicator } from '@/components/chat/status-indicator'
 import { ThemeToggle } from '@/components/ui/theme-toggle'
 import { Button } from '@/components/ui/button'
-import { Terminal, Heart, Crown } from 'lucide-react'
+import { Terminal, Heart, Crown, LogOut, User } from 'lucide-react'
 import Link from 'next/link'
+import { useAuth } from '@/contexts/auth-context'
 
 export default function Home() {
   const [messages, setMessages] = useState<Message[]>([])
   const [isLoading, setIsLoading] = useState(false)
+  const { user, signOut, getAuthToken } = useAuth()
 
   const handleSendMessage = async (content: string) => {
     // Add user message
@@ -25,6 +27,12 @@ export default function Home() {
     setIsLoading(true)
 
     try {
+      // Get auth token
+      const authToken = await getAuthToken()
+      if (!authToken) {
+        throw new Error('No authentication token available')
+      }
+
       // Send message to API endpoint
       const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://r2r3oacvc3.execute-api.us-east-1.amazonaws.com/dev'
       const endpoint = `${apiUrl}/chat`
@@ -32,6 +40,7 @@ export default function Home() {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${authToken}`,
         },
         body: JSON.stringify({ message: content }),
       })
@@ -87,7 +96,17 @@ export default function Home() {
               </Button>
             </Link>
           </div>
-          <ThemeToggle />
+          <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+              <User className="h-4 w-4" />
+              <span>{user?.email || user?.username}</span>
+            </div>
+            <Button variant="outline" size="sm" onClick={signOut}>
+              <LogOut className="h-4 w-4 mr-2" />
+              Sign Out
+            </Button>
+            <ThemeToggle />
+          </div>
         </div>
         
         {/* Main Content */}
