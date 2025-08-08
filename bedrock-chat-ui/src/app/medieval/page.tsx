@@ -87,13 +87,7 @@ export default function MedievalPage() {
     return prefix + content + suffix
   }
 
-  const handleKnowledgeBaseSelect = (knowledgeBaseId: string) => {
-    setSelectedKnowledgeBase(knowledgeBaseId)
-    // Clear messages when switching knowledge bases
-    setMessages([])
-  }
 
-  const selectedKB = knowledgeBases.find(kb => kb.id === selectedKnowledgeBase)
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-stone-100 via-slate-100 to-gray-100 py-4 px-4 relative overflow-hidden">
