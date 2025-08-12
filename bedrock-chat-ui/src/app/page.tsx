@@ -38,7 +38,7 @@ export default function Home() {
       setTimeout(() => setLoadingStage('responding'), 2000)
 
       // Get API URL from environment (ALB DNS name)
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://bedrock-chat-ecs-alb-dev-435953948.us-east-1.elb.amazonaws.com'
       if (!apiUrl) {
         throw new Error('API URL not configured. Please set NEXT_PUBLIC_API_URL environment variable.')
       }
