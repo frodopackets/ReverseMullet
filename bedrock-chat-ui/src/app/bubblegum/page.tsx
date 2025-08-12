@@ -27,12 +27,8 @@ export default function BubblegumPage() {
     setIsLoading(true)
 
     try {
-      // Get API URL from environment (ALB DNS name)
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL
-      if (!apiUrl) {
-        throw new Error('API URL not configured. Please set NEXT_PUBLIC_API_URL environment variable.')
-      }
-
+      // Get API URL from configuration
+      const apiUrl = 'https://bedrock-chat-ecs-alb-dev-435953948.us-east-1.elb.amazonaws.com'
       const endpoint = `${apiUrl}/router-chat`
       
       // For ALB authentication, we use cookies instead of Authorization headers
