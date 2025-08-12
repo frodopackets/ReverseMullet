@@ -27,23 +27,33 @@ export default function BubblegumPage() {
     setIsLoading(true)
 
     try {
-      // Get auth token
-      const authToken = await getAuthToken()
-      if (!authToken) {
-        throw new Error('No authentication token available')
+      // Get API URL from environment (ALB DNS name)
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL
+      if (!apiUrl) {
+        throw new Error('API URL not configured. Please set NEXT_PUBLIC_API_URL environment variable.')
       }
 
-      // Send message to API endpoint
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://r2r3oacvc3.execute-api.us-east-1.amazonaws.com/dev'
-      const endpoint = `${apiUrl}/chat`
-      const response = await fetch(endpoint, {
+      const endpoint = `${apiUrl}/router-chat`
+      
+      // For ALB authentication, we use cookies instead of Authorization headers
+      const fetchOptions: RequestInit = {
         method: 'POST',
+        credentials: 'include', // Important: Include cookies for ALB session
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${authToken}`,
         },
         body: JSON.stringify({ message: content }),
-      })
+      }
+
+      // For Amplify mode, add Authorization header
+      if (process.env.NEXT_PUBLIC_AUTH_MODE === 'amplify') {
+        const authToken = await getAuthToken()
+        if (authToken) {
+          (fetchOptions.headers as Record<string, string>)['Authorization'] = `Bearer ${authToken}`
+        }
+      }
+
+      const response = await fetch(endpoint, fetchOptions)
 
       if (!response.ok) {
         throw new Error('Failed to get response from API')

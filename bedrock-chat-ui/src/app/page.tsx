@@ -8,10 +8,13 @@ import { Button } from '@/components/ui/button'
 import { Terminal, Heart, Crown, LogOut, User } from 'lucide-react'
 import Link from 'next/link'
 import { useAuth } from '@/contexts/auth-context'
+import { parsePricingResponse } from '@/utils/pricing-parser'
 
 export default function Home() {
   const [messages, setMessages] = useState<Message[]>([])
   const [isLoading, setIsLoading] = useState(false)
+  const [loadingStage, setLoadingStage] = useState<'analyzing' | 'routing' | 'processing' | 'responding'>('analyzing')
+  const [currentAgent, setCurrentAgent] = useState<string>()
   const { user, signOut, getAuthToken } = useAuth()
 
   const handleSendMessage = async (content: string) => {
@@ -25,55 +28,136 @@ export default function Home() {
 
     setMessages(prev => [...prev, userMessage])
     setIsLoading(true)
+    setLoadingStage('analyzing')
+    setCurrentAgent(undefined)
 
     try {
-      // Get auth token
-      const authToken = await getAuthToken()
-      if (!authToken) {
-        throw new Error('No authentication token available')
+      // Simulate loading stages for better UX
+      setTimeout(() => setLoadingStage('routing'), 500)
+      setTimeout(() => setLoadingStage('processing'), 1000)
+      setTimeout(() => setLoadingStage('responding'), 2000)
+
+      // Get API URL from environment (ALB DNS name)
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL
+      if (!apiUrl) {
+        throw new Error('API URL not configured. Please set NEXT_PUBLIC_API_URL environment variable.')
       }
 
-      // Send message to API endpoint
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://r2r3oacvc3.execute-api.us-east-1.amazonaws.com/dev'
-      const endpoint = `${apiUrl}/chat`
-      const response = await fetch(endpoint, {
+      const endpoint = `${apiUrl}/router-chat`
+      
+      // For ALB authentication, we use cookies instead of Authorization headers
+      // The ALB handles authentication and passes user info to the backend
+      const fetchOptions: RequestInit = {
         method: 'POST',
+        credentials: 'include', // Important: Include cookies for ALB session
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${authToken}`,
         },
         body: JSON.stringify({ message: content }),
-      })
+      }
+
+      // For Amplify mode, add Authorization header
+      if (process.env.NEXT_PUBLIC_AUTH_MODE === 'amplify') {
+        const authToken = await getAuthToken()
+        if (authToken) {
+          (fetchOptions.headers as Record<string, string>)['Authorization'] = `Bearer ${authToken}`
+        }
+      }
+
+      const response = await fetch(endpoint, fetchOptions)
 
       if (!response.ok) {
         throw new Error('Failed to get response from API')
       }
 
       const assistantMessage = await response.json()
-      // Convert timestamp string back to Date object
-      const messageWithDateTimestamp = {
+      
+      // Set current agent based on response
+      if (assistantMessage.agent_type) {
+        setCurrentAgent(assistantMessage.agent_type)
+      }
+      
+      // Parse pricing metadata if this is a pricing response
+      const pricingMetadata = parsePricingResponse(assistantMessage.content, assistantMessage.agent_type)
+      
+      // Convert timestamp string back to Date object and ensure all fields are present
+      const messageWithDateTimestamp: Message = {
         ...assistantMessage,
-        timestamp: new Date(assistantMessage.timestamp)
+        timestamp: new Date(assistantMessage.timestamp),
+        agent_type: assistantMessage.agent_type,
+        intent_analysis: assistantMessage.intent_analysis,
+        orchestration_metadata: assistantMessage.orchestration_metadata,
+        pricing_metadata: pricingMetadata
       }
       setMessages(prev => [...prev, messageWithDateTimestamp])
     } catch (error) {
       console.error('Failed to send message:', error)
-      // Add error message
+      
+      // Generate context-aware error message
+      const isPricingQuery = content.toLowerCase().includes('cost') || 
+                           content.toLowerCase().includes('price') || 
+                           content.toLowerCase().includes('pricing') ||
+                           content.toLowerCase().includes('budget')
+      
+      let errorContent = 'I apologize, but I encountered an error while processing your request.'
+      
+      if (isPricingQuery) {
+        errorContent += `
+
+**For AWS Pricing Questions:**
+Since you appear to be asking about AWS costs, here are some alternatives while I resolve this issue:
+
+1. **AWS Calculator** - Visit https://calculator.aws/ for official pricing
+2. **Try rephrasing** - Be more specific about the AWS services you're interested in
+3. **Try again** - This may be a temporary connectivity issue
+
+**Example queries that work well:**
+- "What's the monthly cost of a t3.small EC2 instance?"
+- "RDS pricing for MySQL database"
+- "S3 storage costs for 100GB"
+
+Please try your question again!`
+      } else {
+        errorContent += `
+
+**What you can try:**
+1. **Rephrase your question** - Try asking in a different way
+2. **Be more specific** - Include more details about what you need
+3. **Try again** - This may be a temporary system issue
+
+**I can help with:**
+- AWS service questions and best practices
+- Cost analysis and pricing information  
+- Architecture recommendations
+- Technical guidance
+
+Please try your question again!`
+      }
+      
+      // Add enhanced error message
       const errorMessage: Message = {
         id: `error-${Date.now()}`,
-        content: 'Sorry, I encountered an error while processing your request. Please try again.',
+        content: errorContent,
         role: 'assistant',
-        timestamp: new Date()
+        timestamp: new Date(),
+        agent_type: 'enhanced_error_handler',
+        intent_analysis: {
+          intent: isPricingQuery ? 'aws_pricing_error' : 'system_error',
+          confidence: 'high',
+          error_handled: true
+        }
       }
       setMessages(prev => [...prev, errorMessage])
     } finally {
       setIsLoading(false)
+      setLoadingStage('analyzing')
+      setCurrentAgent(undefined)
     }
   }
 
   return (
     <div className="min-h-screen bg-background py-4 px-4">
-      <div className="max-w-6xl mx-auto space-y-6">
+      <div className="max-w-7xl mx-auto space-y-4">
         {/* Navigation Bar */}
         <div className="flex justify-between items-center py-4">
           <div className="flex gap-2">
@@ -109,21 +193,34 @@ export default function Home() {
           </div>
         </div>
         
-        {/* Main Content */}
-        <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-foreground mb-2">
-            AWS Bedrock Nova Lite Chat
+        {/* Compact Header */}
+        <div className="text-center mb-4">
+          <h1 className="text-2xl font-bold text-foreground mb-1">
+            AI-First AWS Pricing Agent
           </h1>
-          <p className="text-muted-foreground mb-4">
-            Direct connection to AWS Bedrock Nova Lite model for intelligent conversations
+          <p className="text-sm text-muted-foreground mb-2">
+            Real-time AWS pricing data via MCP integration
           </p>
-          <StatusIndicator isConnected={true} mode="bedrock" />
+          <div className="flex items-center justify-center gap-3">
+            <StatusIndicator isConnected={true} mode="router" />
+            <span className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded-full">
+              ✅ Real-Time Data
+            </span>
+            <span className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded-full">
+              🧠 AI-First
+            </span>
+            <span className="text-xs bg-purple-100 text-purple-700 px-2 py-1 rounded-full">
+              ⚡ MCP Integration
+            </span>
+          </div>
         </div>
-
+        
         <SimpleChatInterface
           messages={messages}
           onSendMessage={handleSendMessage}
           isLoading={isLoading}
+          loadingStage={loadingStage}
+          currentAgent={currentAgent}
         />
       </div>
     </div>

@@ -1,47 +1,23 @@
 'use client'
 
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import { Amplify } from 'aws-amplify';
-import { getCurrentUser, signOut, fetchAuthSession } from 'aws-amplify/auth';
-
-// Configure Amplify
-const userPoolId = process.env.NEXT_PUBLIC_COGNITO_USER_POOL_ID;
-const userPoolClientId = process.env.NEXT_PUBLIC_COGNITO_USER_POOL_CLIENT_ID;
-
-if (!userPoolId || !userPoolClientId) {
-  console.error('Cognito configuration missing:', { userPoolId, userPoolClientId });
-}
-
-Amplify.configure({
-  Auth: {
-    Cognito: {
-      userPoolId: userPoolId || 'us-east-1_MYDJcCcnR',
-      userPoolClientId: userPoolClientId || 'onearv9g4ruj8vhhe7as2ceja',
-      loginWith: {
-        email: true,
-      },
-    },
-  },
-});
-
-interface User {
-  username: string;
-  email?: string;
-}
+import { authService, AuthUser } from '@/lib/auth-service';
 
 interface AuthContextType {
-  user: User | null;
+  user: AuthUser | null;
   isLoading: boolean;
   isAuthenticated: boolean;
   signOut: () => Promise<void>;
   getAuthToken: () => Promise<string | null>;
+  authMode: 'alb' | 'amplify';
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState<AuthUser | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const authMode = (process.env.NEXT_PUBLIC_AUTH_MODE as 'alb' | 'amplify') || 'alb';
 
   useEffect(() => {
     checkAuthState();
@@ -49,12 +25,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const checkAuthState = async () => {
     try {
-      const currentUser = await getCurrentUser();
-      setUser({
-        username: currentUser.username,
-        email: currentUser.signInDetails?.loginId,
-      });
+      const currentUser = await authService.getCurrentUser();
+      setUser(currentUser);
     } catch (error) {
+      console.error('Auth check failed:', error);
       setUser(null);
     } finally {
       setIsLoading(false);
@@ -63,17 +37,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const handleSignOut = async () => {
     try {
-      await signOut();
+      await authService.signOut();
       setUser(null);
     } catch (error) {
       console.error('Error signing out:', error);
+      throw error;
     }
   };
 
   const getAuthToken = async (): Promise<string | null> => {
     try {
-      const session = await fetchAuthSession();
-      return session.tokens?.idToken?.toString() || null;
+      return await authService.getAuthToken();
     } catch (error) {
       console.error('Error getting auth token:', error);
       return null;
@@ -86,6 +60,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     isAuthenticated: !!user,
     signOut: handleSignOut,
     getAuthToken,
+    authMode,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

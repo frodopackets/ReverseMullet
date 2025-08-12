@@ -140,3 +140,31 @@ create-lambda-zip.py
 # Temporary files
 tmp/
 temp/
+
+# Additional security patterns
+*.tfvars
+*.pem
+*.key
+*secret*
+*password*
+*credentials*
+.env*
+amplify-build.*
+__pycache__/
+*.pyc
+venv/
+.venv/
+
+# MCP and test files
+.mcp.json
+test_*.py
+debug_*.py
+cost_*.json
+*test_report*.json
+requirements-*.txt
+
+# Deployment artifacts
+deploy-*.sh
+*.tar.gz
+podman-*/
+bin/

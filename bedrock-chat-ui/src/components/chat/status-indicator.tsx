@@ -5,7 +5,7 @@ import { Wifi, WifiOff } from 'lucide-react'
 
 interface StatusIndicatorProps {
   isConnected: boolean
-  mode: 'mock' | 'bedrock'
+  mode: 'mock' | 'bedrock' | 'router'
 }
 
 export function StatusIndicator({ isConnected, mode }: StatusIndicatorProps) {
@@ -22,7 +22,7 @@ export function StatusIndicator({ isConnected, mode }: StatusIndicatorProps) {
         </span>
       </div>
       <Badge variant={mode === 'mock' ? 'secondary' : 'default'}>
-        {mode === 'mock' ? 'Mock Mode' : 'Bedrock'}
+        {mode === 'mock' ? 'Mock Mode' : mode === 'router' ? 'Intelligent Router' : 'Bedrock'}
       </Badge>
     </div>
   )

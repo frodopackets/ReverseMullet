@@ -5,24 +5,47 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card } from '@/components/ui/card'
 import { Send, Bot, User } from 'lucide-react'
+import { AgentIndicator } from './agent-indicator'
+import { AgentLoadingState } from './agent-loading-state'
+import { PricingResponseDisplay } from './pricing-response-display'
+import { PricingResponseMetadata } from '@/types/pricing'
+import { MessageFormatter } from './message-formatter'
 
 export interface Message {
   id: string
   content: string
   role: 'user' | 'assistant'
   timestamp: Date
+  agent_type?: 'router' | 'aws_pricing' | 'general' | 'fallback_error' | 'orchestrator_fallback' | string
+  intent_analysis?: {
+    intent?: string
+    confidence?: 'high' | 'medium' | 'low'
+    fallback_applied?: boolean
+    error_handled?: boolean
+  }
+  orchestration_metadata?: {
+    context_messages_count?: number
+    current_architecture_available?: boolean
+    last_agent_used?: string
+    context_summary?: string
+  }
+  pricing_metadata?: PricingResponseMetadata
 }
 
 interface SimpleChatInterfaceProps {
   messages: Message[]
   onSendMessage: (message: string) => void
   isLoading: boolean
+  loadingStage?: 'analyzing' | 'routing' | 'processing' | 'responding'
+  currentAgent?: string
 }
 
 export function SimpleChatInterface({
   messages,
   onSendMessage,
-  isLoading
+  isLoading,
+  loadingStage = 'analyzing',
+  currentAgent
 }: SimpleChatInterfaceProps) {
   const [input, setInput] = useState('')
   const messagesEndRef = useRef<HTMLDivElement>(null)
@@ -61,29 +84,35 @@ export function SimpleChatInterface({
   }
 
   return (
-    <Card className="w-full max-w-4xl mx-auto bg-card border shadow-lg">
+    <Card className="w-full mx-auto bg-card border shadow-lg">
       {/* Header */}
       <div className="border-b bg-muted/50 p-4">
         <div className="flex items-center gap-3">
           <Bot className="h-6 w-6 text-primary" />
           <div>
-            <h2 className="font-semibold text-lg">Nova Lite Assistant</h2>
+            <h2 className="font-semibold text-lg">Intelligent AWS Assistant</h2>
             <p className="text-sm text-muted-foreground">
-              Powered by AWS Bedrock • Direct connection to Nova Lite
+              AI-powered routing • AWS pricing analysis • General knowledge
             </p>
           </div>
         </div>
       </div>
 
-      {/* Messages Area */}
-      <div ref={messagesContainerRef} className="h-96 overflow-y-auto p-4">
+      {/* Messages Area - Made much taller */}
+      <div ref={messagesContainerRef} className="h-[600px] overflow-y-auto p-6">
         {messages.length === 0 ? (
           <div className="text-center py-12">
             <Bot className="h-16 w-16 mx-auto mb-4 text-muted-foreground" />
-            <h3 className="text-xl font-semibold mb-2">Welcome to Nova Lite Chat</h3>
-            <p className="text-muted-foreground">
-              Start a conversation with AWS Bedrock's Nova Lite model. Ask me anything!
+            <h3 className="text-xl font-semibold mb-2">Welcome to Your Intelligent AWS Assistant</h3>
+            <p className="text-muted-foreground mb-4">
+              I can help with AWS pricing analysis, cost optimization, and general questions.
             </p>
+            <div className="text-sm text-muted-foreground space-y-1">
+              <p>• Ask about AWS service costs and pricing</p>
+              <p>• Get architecture cost estimates</p>
+              <p>• Receive cost optimization recommendations</p>
+              <p>• General technical questions and guidance</p>
+            </div>
           </div>
         ) : (
           <div className="space-y-4">
@@ -94,17 +123,45 @@ export function SimpleChatInterface({
                     <Bot className="h-4 w-4 text-primary" />
                   </div>
                 )}
-                <div className={`max-w-xs lg:max-w-md px-4 py-2 rounded-lg ${
+                <div className={`${
                   message.role === 'user' 
-                    ? 'bg-primary text-primary-foreground' 
-                    : 'bg-muted'
+                    ? 'max-w-md lg:max-w-xl text-right' 
+                    : message.agent_type === 'aws_pricing' && message.pricing_metadata
+                      ? 'max-w-3xl lg:max-w-5xl'
+                      : 'max-w-2xl lg:max-w-3xl'
                 }`}>
-                  <p className="text-sm leading-relaxed">{message.content}</p>
-                  <p className={`text-xs mt-1 ${
-                    message.role === 'user' ? 'text-primary-foreground/70' : 'text-muted-foreground'
+                  <div className={`px-5 py-3 rounded-lg ${
+                    message.role === 'user' 
+                      ? 'bg-primary text-primary-foreground' 
+                      : 'bg-muted'
                   }`}>
-                    {formatTimestamp(message.timestamp)}
-                  </p>
+                    {message.role === 'user' ? (
+                      <p className="text-base leading-relaxed whitespace-pre-wrap">{message.content}</p>
+                    ) : (
+                      <MessageFormatter content={message.content} className="text-base" />
+                    )}
+                    <div className={`flex items-center justify-between mt-2 ${
+                      message.role === 'user' ? 'flex-row-reverse' : ''
+                    }`}>
+                      <p className={`text-xs ${
+                        message.role === 'user' ? 'text-primary-foreground/70' : 'text-muted-foreground'
+                      }`}>
+                        {formatTimestamp(message.timestamp)}
+                      </p>
+                      {message.role === 'assistant' && (
+                        <AgentIndicator 
+                          agentType={message.agent_type} 
+                          intentAnalysis={message.intent_analysis}
+                          size="sm"
+                        />
+                      )}
+                    </div>
+                  </div>
+                  
+                  {/* Specialized Pricing Response Display */}
+                  {message.role === 'assistant' && message.agent_type === 'aws_pricing' && message.pricing_metadata && (
+                    <PricingResponseDisplay metadata={message.pricing_metadata} />
+                  )}
                 </div>
                 {message.role === 'user' && (
                   <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center flex-shrink-0">
@@ -114,39 +171,25 @@ export function SimpleChatInterface({
               </div>
             ))}
             {isLoading && (
-              <div className="flex gap-3 justify-start">
-                <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
-                  <Bot className="h-4 w-4 text-primary animate-pulse" />
-                </div>
-                <div className="bg-muted px-4 py-2 rounded-lg">
-                  <div className="flex items-center gap-2">
-                    <span className="text-sm">Nova Lite is thinking</span>
-                    <div className="flex gap-1">
-                      <div className="w-2 h-2 bg-primary/60 rounded-full animate-bounce" style={{ animationDelay: '0s' }}></div>
-                      <div className="w-2 h-2 bg-primary/60 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
-                      <div className="w-2 h-2 bg-primary/60 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
-                    </div>
-                  </div>
-                </div>
-              </div>
+              <AgentLoadingState stage={loadingStage} currentAgent={currentAgent} />
             )}
           </div>
         )}
         <div ref={messagesEndRef} />
       </div>
 
-      {/* Input Area */}
-      <div className="border-t p-4">
-        <form onSubmit={handleSubmit} className="flex gap-2">
+      {/* Input Area - Made larger */}
+      <div className="border-t p-6">
+        <form onSubmit={handleSubmit} className="flex gap-3">
           <Input
             value={input}
             onChange={(e) => setInput(e.target.value)}
-            placeholder="Ask Nova Lite anything..."
+            placeholder="Ask about AWS costs, architecture, or anything else..."
             disabled={isLoading}
-            className="flex-1"
+            className="flex-1 text-base py-6 px-4"
           />
-          <Button type="submit" disabled={!input.trim() || isLoading}>
-            <Send className="h-4 w-4" />
+          <Button type="submit" disabled={!input.trim() || isLoading} className="px-6">
+            <Send className="h-5 w-5" />
           </Button>
         </form>
       </div>
