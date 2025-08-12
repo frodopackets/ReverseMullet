@@ -33,7 +33,7 @@ Resources:
                 Resource:
                   - !Sub 'arn:aws:bedrock:${AWS::Region}::foundation-model/*'
 
-  # Chat Lambda Function
+  # Chat Lambda Function (Direct Bedrock)
   ChatLambdaFunction:
     Type: AWS::Lambda::Function
     Properties:
@@ -99,6 +99,45 @@ Resources:
                 })
               };
             }
+          };
+      Environment:
+        Variables:
+          AWS_REGION: !Ref AWS::Region
+      Timeout: 30
+
+  # Router Chat Lambda Function (Intelligent Agent Routing)
+  RouterChatLambdaFunction:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: !Sub 'bedrock-router-chat-${Environment}'
+      Runtime: nodejs18.x
+      Handler: router-chat-handler.handler
+      Role: !GetAtt BedrockLambdaRole.Arn
+      Code:
+        ZipFile: |
+          // Placeholder - will be replaced with actual router-chat-handler.js during deployment
+          exports.handler = async (event) => {
+            const headers = {
+              'Access-Control-Allow-Origin': '*',
+              'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+              'Access-Control-Allow-Methods': 'POST, OPTIONS',
+              'Content-Type': 'application/json'
+            };
+            if (event.httpMethod === 'OPTIONS') {
+              return { statusCode: 200, headers, body: '' };
+            }
+            return {
+              statusCode: 200,
+              headers,
+              body: JSON.stringify({
+                id: `assistant-${Date.now()}`,
+                content: 'Router agent is being configured. Please try again shortly.',
+                role: 'assistant',
+                timestamp: new Date().toISOString(),
+                agent_type: 'configuration_pending',
+                intent_analysis: { intent: 'system_setup', confidence: 'high' }
+              })
+            };
           };
       Environment:
         Variables:
@@ -188,6 +227,13 @@ Resources:
       ParentId: !GetAtt BedrockApiGateway.RootResourceId
       PathPart: 'chat'
 
+  RouterChatResource:
+    Type: AWS::ApiGateway::Resource
+    Properties:
+      RestApiId: !Ref BedrockApiGateway
+      ParentId: !GetAtt BedrockApiGateway.RootResourceId
+      PathPart: 'router-chat'
+
   HealthResource:
     Type: AWS::ApiGateway::Resource
     Properties:
@@ -195,7 +241,7 @@ Resources:
       ParentId: !GetAtt BedrockApiGateway.RootResourceId
       PathPart: 'health'
 
-  # Chat POST Method
+  # Chat POST Method (Direct Bedrock)
   ChatPostMethod:
     Type: AWS::ApiGateway::Method
     Properties:
@@ -214,6 +260,44 @@ Resources:
     Properties:
       RestApiId: !Ref BedrockApiGateway
       ResourceId: !Ref ChatResource
+      HttpMethod: OPTIONS
+      AuthorizationType: NONE
+      Integration:
+        Type: MOCK
+        IntegrationResponses:
+          - StatusCode: 200
+            ResponseParameters:
+              method.response.header.Access-Control-Allow-Headers: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
+              method.response.header.Access-Control-Allow-Methods: "'POST,OPTIONS'"
+              method.response.header.Access-Control-Allow-Origin: "'*'"
+        RequestTemplates:
+          application/json: '{"statusCode": 200}'
+      MethodResponses:
+        - StatusCode: 200
+          ResponseParameters:
+            method.response.header.Access-Control-Allow-Headers: true
+            method.response.header.Access-Control-Allow-Methods: true
+            method.response.header.Access-Control-Allow-Origin: true
+
+  # Router Chat POST Method (Intelligent Agent Routing)
+  RouterChatPostMethod:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      RestApiId: !Ref BedrockApiGateway
+      ResourceId: !Ref RouterChatResource
+      HttpMethod: POST
+      AuthorizationType: NONE
+      Integration:
+        Type: AWS_PROXY
+        IntegrationHttpMethod: POST
+        Uri: !Sub 'arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${RouterChatLambdaFunction.Arn}/invocations'
+
+  # Router Chat OPTIONS Method (CORS)
+  RouterChatOptionsMethod:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      RestApiId: !Ref BedrockApiGateway
+      ResourceId: !Ref RouterChatResource
       HttpMethod: OPTIONS
       AuthorizationType: NONE
       Integration:
@@ -255,6 +339,14 @@ Resources:
       Principal: apigateway.amazonaws.com
       SourceArn: !Sub '${BedrockApiGateway}/*/POST/chat'
 
+  RouterChatLambdaPermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName: !Ref RouterChatLambdaFunction
+      Action: lambda:InvokeFunction
+      Principal: apigateway.amazonaws.com
+      SourceArn: !Sub '${BedrockApiGateway}/*/POST/router-chat'
+
   HealthLambdaPermission:
     Type: AWS::Lambda::Permission
     Properties:
@@ -269,6 +361,8 @@ Resources:
     DependsOn:
       - ChatPostMethod
       - ChatOptionsMethod
+      - RouterChatPostMethod
+      - RouterChatOptionsMethod
       - HealthGetMethod
     Properties:
       RestApiId: !Ref BedrockApiGateway
@@ -282,8 +376,12 @@ Outputs:
       Name: !Sub '${AWS::StackName}-ApiUrl'
 
   ChatEndpoint:
-    Description: 'Chat API Endpoint'
+    Description: 'Chat API Endpoint (Direct Bedrock)'
     Value: !Sub 'https://${BedrockApiGateway}.execute-api.${AWS::Region}.amazonaws.com/${Environment}/chat'
+
+  RouterChatEndpoint:
+    Description: 'Router Chat API Endpoint (Intelligent Agent Routing)'
+    Value: !Sub 'https://${BedrockApiGateway}.execute-api.${AWS::Region}.amazonaws.com/${Environment}/router-chat'
 
   HealthEndpoint:
     Description: 'Health Check Endpoint'

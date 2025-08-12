@@ -1,0 +1,49 @@
+# Example Terraform Variables Configuration
+# Copy this file to terraform.tfvars and customize for your deployment
+
+# Basic Configuration
+aws_region   = "us-east-1"
+environment  = "dev"
+project_name = "bedrock-chat"
+
+# ECS Configuration for Personal Use
+ecs_desired_count = 1     # Start with 1 task for personal use
+ecs_min_capacity  = 1     # Minimum 1 task
+ecs_max_capacity  = 2     # Maximum 2 tasks for personal use
+ecs_cpu          = 1024   # 1 vCPU
+ecs_memory       = 2048   # 2 GB RAM
+
+# Cost Optimization Settings
+enable_scheduled_scaling = false  # Set to true to enable scheduled scaling
+enable_fargate_spot     = false  # Set to true for 50% cost savings (with interruption risk)
+log_retention_days      = 7      # Keep logs for 1 week
+
+# Scheduled Scaling (when enabled)
+scale_down_schedule = "cron(0 22 * * ? *)"  # 10 PM UTC (6 PM EST) - scale down
+scale_up_schedule   = "cron(0 14 * * ? *)"  # 2 PM UTC (10 AM EST) - scale up
+
+# Monitoring Configuration
+cpu_alarm_threshold    = 80   # CPU alarm at 80%
+memory_alarm_threshold = 85   # Memory alarm at 85%
+cpu_target_value      = 70   # Auto-scale at 70% CPU
+memory_target_value   = 80   # Auto-scale at 80% memory
+
+# Development Settings
+is_production           = false
+enable_container_insights = true
+enable_execute_command   = true
+
+# Additional Tags (optional)
+additional_tags = {
+  Owner       = "your-name"
+  CostCenter  = "personal"
+  Purpose     = "aws-pricing-agent"
+}
+
+# Production Configuration Example (uncomment and modify for production)
+# ecs_desired_count = 2
+# ecs_min_capacity  = 2
+# ecs_max_capacity  = 4
+# enable_scheduled_scaling = true
+# log_retention_days = 30
+# is_production = true

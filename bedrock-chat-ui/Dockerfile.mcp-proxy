@@ -1,0 +1,49 @@
+# Dockerfile for MCP Proxy Server
+FROM python:3.11-slim
+
+# Set environment variables
+ENV PYTHONUNBUFFERED=1
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV PATH="/root/.local/bin:$PATH"
+ENV MCP_PROXY_PORT=8001
+
+# Install system dependencies
+RUN apt-get update && apt-get install -y \
+    curl \
+    git \
+    build-essential \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install uv for MCP servers
+RUN pip install --upgrade pip
+RUN pip install uv
+
+# Install uvx (included in uv) and verify
+RUN uv --version
+
+# Set working directory
+WORKDIR /app
+
+# Create requirements file for the proxy
+RUN echo "fastapi==0.104.1\nuvicorn==0.24.0\nrequests==2.31.0" > requirements-proxy.txt
+
+# Install Python dependencies
+RUN pip install -r requirements-proxy.txt
+
+# Copy the proxy server
+COPY mcp_proxy_server.py .
+
+# Create non-root user for security
+RUN useradd --create-home --shell /bin/bash mcpuser
+RUN chown -R mcpuser:mcpuser /app
+USER mcpuser
+
+# Expose port
+EXPOSE 8001
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
+    CMD curl -f http://localhost:8001/health || exit 1
+
+# Run the proxy server
+CMD ["python", "mcp_proxy_server.py"]

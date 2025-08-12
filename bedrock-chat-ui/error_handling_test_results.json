@@ -1,0 +1,91 @@
+[
+  {
+    "scenario": "MCP Server Unavailable (Fallback Mode)",
+    "pricing_agent_status": "success",
+    "router_agent_status": "success",
+    "mcp_available": true,
+    "confidence": "high",
+    "features_found": [
+      "confidence level"
+    ],
+    "features_expected": [
+      "fallback mode",
+      "knowledge base",
+      "confidence level"
+    ],
+    "feature_coverage": 33.33333333333333,
+    "error_handling_quality": "Good",
+    "response_time": 3.2136197090148926,
+    "context_length": 1
+  },
+  {
+    "scenario": "Vague Architecture Description",
+    "pricing_agent_status": "success",
+    "router_agent_status": "success",
+    "mcp_available": true,
+    "confidence": "high",
+    "features_found": [],
+    "features_expected": [
+      "clarifying questions",
+      "specific guidance",
+      "examples"
+    ],
+    "feature_coverage": 0.0,
+    "error_handling_quality": "Good",
+    "response_time": 4.897502422332764,
+    "context_length": 2
+  },
+  {
+    "scenario": "Invalid Service Request",
+    "pricing_agent_status": "success",
+    "router_agent_status": "success",
+    "mcp_available": true,
+    "confidence": "high",
+    "features_found": [],
+    "features_expected": [
+      "error explanation",
+      "alternative suggestions",
+      "valid examples"
+    ],
+    "feature_coverage": 0.0,
+    "error_handling_quality": "Good",
+    "response_time": 2.279972791671753,
+    "context_length": 3
+  },
+  {
+    "scenario": "Router Intent Uncertainty",
+    "pricing_agent_status": "success",
+    "router_agent_status": "success",
+    "mcp_available": true,
+    "confidence": "high",
+    "features_found": [],
+    "features_expected": [
+      "uncertainty guidance",
+      "pricing capability mention",
+      "helpful response"
+    ],
+    "feature_coverage": 0.0,
+    "error_handling_quality": "Good",
+    "response_time": 5.541996240615845,
+    "context_length": 4
+  },
+  {
+    "scenario": "Complex Multi-Service Query",
+    "pricing_agent_status": "success",
+    "router_agent_status": "success",
+    "mcp_available": true,
+    "confidence": "high",
+    "features_found": [
+      "optimization recommendations"
+    ],
+    "features_expected": [
+      "context management",
+      "comprehensive analysis",
+      "optimization recommendations"
+    ],
+    "feature_coverage": 33.33333333333333,
+    "error_handling_quality": "Good",
+    "response_time": 7.9411375522613525,
+    "context_length": 5
+  }
+]
