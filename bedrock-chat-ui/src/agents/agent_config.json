@@ -1,0 +1,83 @@
+{
+  "default_model": {
+    "model_id": "amazon.nova-lite-v1:0",
+    "temperature": 0.3,
+    "max_tokens": 4000,
+    "top_p": 0.8
+  },
+  "agent_settings": {
+    "max_conversation_history": 10,
+    "enable_caching": true,
+    "cache_size": 10,
+    "timeout_seconds": 30,
+    "fallback_enabled": true,
+    "performance_tracking": true
+  },
+  "mcp_settings": {
+    "timeout": 30,
+    "max_retries": 3,
+    "log_level": "ERROR"
+  },
+  "agents": {
+    "aws_pricing": {
+      "name": "AWS Pricing Agent",
+      "description": "Specialized agent for AWS cost analysis and pricing optimization",
+      "version": "2.0.0",
+      "author": "System",
+      "enabled": true,
+      "capabilities": [
+        {
+          "name": "aws_cost_analysis",
+          "description": "Analyze AWS architecture costs and provide estimates",
+          "keywords": ["cost", "price", "pricing", "budget", "estimate", "expensive", "cheap", "savings", "bill", "billing"],
+          "phrases": ["how much does", "cost analysis", "pricing for", "budget for", "optimize costs", "cost comparison"],
+          "priority": 8,
+          "confidence_threshold": 0.6
+        },
+        {
+          "name": "aws_optimization",
+          "description": "Provide AWS cost optimization recommendations",
+          "keywords": ["optimize", "reduce", "save", "cheaper", "alternative", "efficiency"],
+          "phrases": ["optimize costs", "reduce spending", "save money", "cost optimization", "cheaper alternative"],
+          "priority": 7,
+          "confidence_threshold": 0.5
+        }
+      ],
+      "model_config": {
+        "model_id": "amazon.nova-lite-v1:0",
+        "temperature": 0.2,
+        "max_tokens": 6000,
+        "top_p": 0.7
+      },
+      "tools_required": ["mcp_client"],
+      "mcp_servers": ["aws-pricing"],
+      "dependencies": ["strands", "mcp"]
+    }
+  },
+  "future_agents": {
+    "aws_security": {
+      "name": "AWS Security Agent",
+      "description": "Specialized agent for AWS security analysis and recommendations",
+      "capabilities": ["security_analysis", "compliance_check", "vulnerability_assessment"],
+      "keywords": ["security", "compliance", "vulnerability", "iam", "permissions", "encryption"],
+      "priority": 6,
+      "status": "planned"
+    },
+    "aws_performance": {
+      "name": "AWS Performance Agent", 
+      "description": "Specialized agent for AWS performance optimization and monitoring",
+      "capabilities": ["performance_analysis", "monitoring_setup", "optimization_recommendations"],
+      "keywords": ["performance", "monitoring", "optimization", "latency", "throughput", "scaling"],
+      "priority": 5,
+      "status": "planned"
+    },
+    "aws_compliance": {
+      "name": "AWS Compliance Agent",
+      "description": "Specialized agent for AWS compliance and governance",
+      "capabilities": ["compliance_check", "governance_review", "policy_analysis"],
+      "keywords": ["compliance", "governance", "policy", "audit", "regulation", "standards"],
+      "priority": 4,
+      "status": "planned"
+    }
+  }
+}

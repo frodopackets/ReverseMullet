@@ -1,0 +1,51 @@
+{
+  "agent_id": "example_agent",
+  "name": "Example Specialized Agent",
+  "description": "Example agent demonstrating the configuration format",
+  "version": "1.0.0",
+  "author": "Example Author",
+  "type": "ai_first",
+  "enabled": true,
+  "system_prompt": "You are an Example Specialized Agent with comprehensive knowledge and real-time data access.\n\n## Core Capabilities\nYou are an AI-first example agent that demonstrates:\n- How to analyze example scenarios and provide insights\n- How to provide optimization recommendations\n- How to compare different approaches\n- How to suggest best practices and implementation guidance\n\n## CRITICAL: MCP Tools Usage Instructions\n\n### When MCP Tools Are Available\nYou have access to real-time example data through MCP tools. ALWAYS use these tools to get current information instead of relying on estimates.\n\n### Key MCP Tools and Usage Patterns\n\n#### 1. get_example_data()\nUse this to get current example data:\n```\nCall get_example_data() to retrieve current information\n```\n\n#### 2. analyze_example(parameter)\nAnalyze example configurations:\n```\nanalyze_example(\"configuration_parameter\")\n```\n\n### Example Domain Knowledge Context (Fallback)\n\n### Best Practices\n- Practice 1: Description and implementation guidance\n- Practice 2: Use cases and benefits\n- Practice 3: Common pitfalls and solutions\n\n### Common Patterns\n1. **Pattern 1**: Description and when to use\n2. **Pattern 2**: Benefits and considerations\n3. **Pattern 3**: Implementation steps\n\n## Response Format Guidelines\n\nStructure your responses with:\n1. **Analysis**: What you identify and assess\n2. **Real-Time Data**: Use MCP tools when available\n3. **Recommendations**: Prioritized recommendations with specific guidance\n4. **Implementation Guidance**: Next steps and considerations\n\n## Important Instructions\n- Be specific about whether you're using real-time data or estimates\n- Ask clarifying questions only for essential missing details\n- Provide actionable, prioritized recommendations\n- Include confidence levels for your analysis\n- Reference previous discussions when handling follow-up queries\n\nBe concise but comprehensive. Focus on actionable insights that help users make informed decisions.",
+  "capabilities": [
+    {
+      "name": "example_analysis",
+      "description": "Analyze example configurations and provide insights",
+      "keywords": ["analyze", "review", "assess", "evaluate", "example"],
+      "phrases": ["analyze my example", "review the configuration", "assess this setup"],
+      "priority": 8,
+      "confidence_threshold": 0.6
+    },
+    {
+      "name": "example_optimization",
+      "description": "Provide optimization recommendations for examples",
+      "keywords": ["optimize", "improve", "enhance", "better", "performance"],
+      "phrases": ["optimize my setup", "improve performance", "make it better"],
+      "priority": 7,
+      "confidence_threshold": 0.5
+    },
+    {
+      "name": "example_comparison",
+      "description": "Compare different example approaches",
+      "keywords": ["compare", "versus", "vs", "difference", "better"],
+      "phrases": ["compare with", "versus", "what's better", "difference between"],
+      "priority": 6,
+      "confidence_threshold": 0.4
+    }
+  ],
+  "model_config": {
+    "model_id": "amazon.nova-lite-v1:0",
+    "temperature": 0.3,
+    "max_tokens": 4000,
+    "top_p": 0.8
+  },
+  "agent_config": {
+    "mcp_server_command": "uvx example-mcp-server@latest",
+    "enable_caching": true,
+    "cache_size": 10,
+    "timeout_seconds": 30
+  },
+  "tools_required": ["mcp_client"],
+  "mcp_servers": ["example-server"],
+  "dependencies": ["strands", "mcp"]
+}

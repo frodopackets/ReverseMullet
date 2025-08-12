@@ -9,6 +9,7 @@ import { Terminal, Heart, Crown, LogOut, User } from 'lucide-react'
 import Link from 'next/link'
 import { useAuth } from '@/contexts/auth-context'
 import { parsePricingResponse } from '@/utils/pricing-parser'
+import { API_CONFIG, API_ENDPOINTS } from '@/config/api'
 
 export default function Home() {
   const [messages, setMessages] = useState<Message[]>([])
@@ -37,13 +38,12 @@ export default function Home() {
       setTimeout(() => setLoadingStage('processing'), 1000)
       setTimeout(() => setLoadingStage('responding'), 2000)
 
-      // Get API URL from environment (ALB DNS name)
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://bedrock-chat-ecs-alb-dev-435953948.us-east-1.elb.amazonaws.com'
-      if (!apiUrl) {
-        throw new Error('API URL not configured. Please set NEXT_PUBLIC_API_URL environment variable.')
-      }
-
-      const endpoint = `${apiUrl}/router-chat`
+      // Get API URL from configuration
+      const apiUrl = API_CONFIG.getApiUrl()
+      console.log('Using API URL:', apiUrl)
+      
+      const endpoint = `${apiUrl}${API_ENDPOINTS.ROUTER_CHAT}`
+      console.log('Making request to:', endpoint)
       
       // For ALB authentication, we use cookies instead of Authorization headers
       // The ALB handles authentication and passes user info to the backend
