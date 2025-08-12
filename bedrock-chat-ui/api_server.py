@@ -68,9 +68,8 @@ app.add_middleware(
     CORSMiddleware,
     allow_origins=[
         "http://localhost:3000",
+        "https://main.d1uq2rdehqninx.amplifyapp.com",  # Correct Amplify URL
         "https://*.amplifyapp.com",
-        "https://main.d1tq2relshaprns.amplifyapp.com",  # Your Amplify URL
-        "*"  # Allow all origins for now - restrict in production
     ],
     allow_credentials=True,
     allow_methods=["GET", "POST", "OPTIONS"],
