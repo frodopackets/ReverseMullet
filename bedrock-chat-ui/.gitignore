@@ -168,3 +168,55 @@ deploy-*.sh
 *.tar.gz
 podman-*/
 bin/
+
+# Session and troubleshooting files (may contain sensitive debugging info)
+TROUBLESHOOTING_SESSION_SUMMARY.md
+CLAUDE.md
+*_SESSION_*.md
+debug_session_*.md
+troubleshooting_*.md
+
+# Infrastructure state files (may contain sensitive resource IDs)
+terraform/terraform.tfstate*
+terraform/.terraform/
+terraform/.terraform.lock.hcl
+*.tfstate*
+*.tfplan
+
+# Environment and config files with real values
+.env
+.env.local
+.env.development
+.env.production
+terraform.tfvars
+terraform.tfvars.json
+
+# Build artifacts and temporary files
+out/
+.next/
+dist/
+build/
+
+# Any file containing 'secret', 'password', 'key', or 'credential' in the name
+*secret*
+*password*
+*credential*
+*private*
+*.key
+*.pem
+
+# Runtime and deployment logs
+deploy*.log
+runtime*.log
+session*.log
+
+# Backup files
+*.backup
+*.bak
+*~
+
+# Additional AWS and infrastructure patterns
+aws-exports.js
+amplify-meta.json
+team-provider-info.json
+.amplifyrc

@@ -152,6 +152,7 @@ export function SimpleChatInterface({
                         <AgentIndicator 
                           agentType={message.agent_type} 
                           intentAnalysis={message.intent_analysis}
+                          messageContent={message.content}
                           size="sm"
                         />
                       )}

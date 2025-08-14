@@ -85,6 +85,7 @@ resource "aws_ecr_repository" "strands_agents" {
   }
 }
 
+
 # ECR Lifecycle Policy
 resource "aws_ecr_lifecycle_policy" "strands_agents" {
   repository = aws_ecr_repository.strands_agents.name
@@ -120,6 +121,7 @@ resource "aws_ecr_lifecycle_policy" "strands_agents" {
     ]
   })
 }
+
 
 # IAM Role for ECS Tasks
 resource "aws_iam_role" "ecs_task_role" {
@@ -179,13 +181,37 @@ resource "aws_iam_role_policy" "ecs_bedrock_policy" {
         Effect = "Allow"
         Action = [
           "bedrock:InvokeModel",
-          "bedrock:InvokeModelWithResponseStream"
+          "bedrock:InvokeModelWithResponseStream",
+          "bedrock:Converse",
+          "bedrock:ConverseStream"
         ]
         Resource = [
           "arn:aws:bedrock:${var.aws_region}::foundation-model/amazon.nova-lite-v1:0",
           "arn:aws:bedrock:${var.aws_region}::foundation-model/amazon.nova-pro-v1:0",
+          "arn:aws:bedrock:${var.aws_region}::foundation-model/amazon.nova-pro-v1:0-latency-optimized",
           "arn:aws:bedrock:${var.aws_region}::foundation-model/amazon.nova-micro-v1:0"
         ]
+      }
+    ]
+  })
+}
+
+# IAM Policy for AWS Pricing API access (required by MCP server)
+resource "aws_iam_role_policy" "ecs_pricing_policy" {
+  name = "${var.project_name}-ecs-pricing-policy-${var.environment}"
+  role = aws_iam_role.ecs_task_role.id
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow"
+        Action = [
+          "pricing:GetProducts",
+          "pricing:GetAttributeValues",
+          "pricing:DescribeServices"
+        ]
+        Resource = "*"
       }
     ]
   })
@@ -221,7 +247,7 @@ resource "aws_ecs_task_definition" "strands_agents" {
   container_definitions = jsonencode([
     {
       name  = "strands-agents"
-      image = "${aws_ecr_repository.strands_agents.repository_url}:latest"
+      image = "${aws_ecr_repository.strands_agents.repository_url}:response-pipeline-final"
       
       portMappings = [
         {
@@ -244,8 +270,8 @@ resource "aws_ecs_task_definition" "strands_agents" {
           value = "info"
         },
         {
-          name  = "MCP_PROXY_URL"
-          value = "http://mcp-proxy.${var.project_name}-${var.environment}.local:8001"
+          name  = "FASTMCP_LOG_LEVEL"
+          value = "ERROR"
         }
       ]
 
@@ -254,7 +280,7 @@ resource "aws_ecs_task_definition" "strands_agents" {
         options = {
           "awslogs-group"         = aws_cloudwatch_log_group.ecs_logs.name
           "awslogs-region"        = var.aws_region
-          "awslogs-stream-prefix" = "ecs"
+          "awslogs-stream-prefix" = "strands-agents"
         }
       }
 

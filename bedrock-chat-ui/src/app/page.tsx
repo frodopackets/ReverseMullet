@@ -204,7 +204,7 @@ Please try your question again!`
           <div className="flex items-center justify-center gap-3">
             <StatusIndicator isConnected={true} mode="router" />
             <span className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded-full">
-              ✅ Real-Time Data
+              ⚡ Live MCP Data
             </span>
             <span className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded-full">
               🧠 AI-First

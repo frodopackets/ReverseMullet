@@ -9,13 +9,13 @@
     "max_conversation_history": 10,
     "enable_caching": true,
     "cache_size": 10,
-    "timeout_seconds": 30,
+    "timeout_seconds": 90,
     "fallback_enabled": true,
     "performance_tracking": true
   },
   "mcp_settings": {
-    "timeout": 30,
-    "max_retries": 3,
+    "timeout": 90,
+    "max_retries": 1,
     "log_level": "ERROR"
   },
   "agents": {
@@ -32,7 +32,7 @@
           "keywords": ["cost", "price", "pricing", "budget", "estimate", "expensive", "cheap", "savings", "bill", "billing"],
           "phrases": ["how much does", "cost analysis", "pricing for", "budget for", "optimize costs", "cost comparison"],
           "priority": 8,
-          "confidence_threshold": 0.6
+          "confidence_threshold": 0.3
         },
         {
           "name": "aws_optimization",
@@ -40,11 +40,11 @@
           "keywords": ["optimize", "reduce", "save", "cheaper", "alternative", "efficiency"],
           "phrases": ["optimize costs", "reduce spending", "save money", "cost optimization", "cheaper alternative"],
           "priority": 7,
-          "confidence_threshold": 0.5
+          "confidence_threshold": 0.3
         }
       ],
       "model_config": {
-        "model_id": "amazon.nova-lite-v1:0",
+        "model_id": "amazon.nova-pro-v1:0",
         "temperature": 0.2,
         "max_tokens": 6000,
         "top_p": 0.7

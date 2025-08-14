@@ -77,24 +77,33 @@ class BaseSpecializedAgent(ABC):
         for capability in capabilities:
             score = 0.0
             
-            # Check keywords - give partial credit for any matches
+            # Enhanced keyword matching with diminishing returns
             keyword_matches = sum(1 for keyword in capability.keywords if keyword in query_lower)
             if capability.keywords and keyword_matches > 0:
-                # Give significant credit for any keyword matches
-                keyword_score = min(keyword_matches / len(capability.keywords), 1.0)
-                score += keyword_score * 0.6
+                # Use logarithmic scaling for multiple matches to prevent oversaturation
+                # 1 match = 0.6, 2 matches = 0.75, 3+ matches = 0.85+
+                keyword_ratio = min(keyword_matches / len(capability.keywords), 1.0)
+                keyword_score = 0.4 + (keyword_ratio * 0.4)  # Base 0.4 + up to 0.4 more
+                score += keyword_score
             
-            # Check phrases - give full credit for any phrase match
+            # Enhanced phrase matching with higher weight
             phrase_matches = sum(1 for phrase in capability.phrases if phrase in query_lower)
             if capability.phrases and phrase_matches > 0:
-                # Give full credit for any phrase match
-                score += 0.8
+                # Phrases are more specific, give them higher weight
+                phrase_score = min(phrase_matches * 0.5, 0.9)  # Up to 0.9 for phrases
+                score += phrase_score
             
-            # If we have any matches, apply priority weighting
+            # Bonus for high-priority capabilities
             if score > 0:
+                priority_bonus = (capability.priority - 5) * 0.05  # Small bonus for priority 6+
+                score += max(priority_bonus, 0)
+                
+                # Apply priority weighting
                 score *= (capability.priority / 10.0)
-                # Ensure minimum score for any match
-                score = max(score, 0.3)
+                
+                # Enhanced minimum score for any relevant match
+                if keyword_matches > 0 or phrase_matches > 0:
+                    score = max(score, 0.6)  # Higher minimum for AWS pricing agent
             
             max_score = max(max_score, score)
         

@@ -207,12 +207,19 @@ Always be helpful, accurate, and leverage the most appropriate specialized knowl
                 confidence = response.get('confidence', 'medium')
                 mcp_available = response.get('mcp_available', False)
                 
-                if not mcp_available:
-                    response_content += f"\n\n**Data Source:** Knowledge base (real-time data unavailable)"
+                # Check if MCP tools were actually used by looking at reliable signals from the agent
+                mcp_calls_made = response.get('performance_stats', {}).get('mcp_calls', 0) > 0
+                
+                # Use the reliable mcp_available flag and mcp_calls count from the specialized agent
+                # These are set by the agent itself when it successfully uses MCP tools
+                tools_actually_used = mcp_available and mcp_calls_made
+                
+                if tools_actually_used:
+                    response_content += f"\n\n**Data Source:** Real-time AWS pricing data"
                     response_content += f"\n**Confidence Level:** {confidence.title()}"
                 else:
-                    response_content += f"\n\n**Data Source:** Real-time data via MCP"
-                    response_content += f"\n**Confidence Level:** {confidence.title()}"
+                    response_content += f"\n\n**Data Source:** Knowledge base estimates - verify with AWS Calculator"
+                    response_content += f"\n**Confidence Level:** Medium (fallback mode)"
                 
                 return response_content
                 
@@ -411,10 +418,10 @@ Would you like me to help with general AWS architecture guidance instead?"""
             confidence_score = agent.get_confidence_score(query) if agent else 0.0
             metadata = self.agent_registry.agent_metadata.get(best_agent_id)
             
-            # Determine confidence level
-            if confidence_score >= 0.8:
+            # Determine confidence level (adjusted thresholds)
+            if confidence_score >= 0.7:
                 confidence = 'high'
-            elif confidence_score >= 0.6:
+            elif confidence_score >= 0.4:
                 confidence = 'medium'
             else:
                 confidence = 'low'

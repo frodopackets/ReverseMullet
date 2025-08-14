@@ -10,6 +10,7 @@ resource "aws_lb" "ecs_alb" {
   subnets            = data.aws_subnets.default.ids
 
   enable_deletion_protection = false
+  idle_timeout              = 360  # 6 minutes to exceed Bedrock timeout of 5 minutes
 
   tags = {
     Environment = var.environment

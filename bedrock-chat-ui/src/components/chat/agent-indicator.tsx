@@ -11,12 +11,17 @@ interface AgentIndicatorProps {
     fallback_applied?: boolean
     error_handled?: boolean
   }
+  messageContent?: string  // Add to detect data source from message content
   size?: 'sm' | 'md'
   showDescription?: boolean
 }
 
-export function AgentIndicator({ agentType, intentAnalysis, size = 'sm', showDescription = false }: AgentIndicatorProps) {
+export function AgentIndicator({ agentType, intentAnalysis, messageContent, size = 'sm', showDescription = false }: AgentIndicatorProps) {
   if (!agentType || agentType === 'user') return null
+  
+  // Detect if this is real-time data vs fallback mode
+  const isRealTimeData = messageContent?.includes('Real-time AWS pricing data')
+  const isFallbackMode = messageContent?.includes('fallback mode') || messageContent?.includes('Knowledge base estimates')
 
   const getAgentInfo = (type: string) => {
     switch (type) {
@@ -85,6 +90,19 @@ export function AgentIndicator({ agentType, intentAnalysis, size = 'sm', showDes
             confidence === 'medium' ? 'border-yellow-300 text-yellow-700' : 'border-red-300 text-red-700'
           }`}>
             {confidence === 'medium' ? '~' : '?'}
+          </Badge>
+        )}
+        
+        {/* Data Source Indicator for AWS Pricing Agent */}
+        {agentType === 'aws_pricing' && isRealTimeData && (
+          <Badge variant="outline" className={`${size === 'sm' ? 'text-xs px-1.5 py-0.5' : 'text-sm px-2 py-1'} border-green-300 text-green-700 bg-green-50`}>
+            ⚡ Live
+          </Badge>
+        )}
+        
+        {agentType === 'aws_pricing' && isFallbackMode && (
+          <Badge variant="outline" className={`${size === 'sm' ? 'text-xs px-1.5 py-0.5' : 'text-sm px-2 py-1'} border-orange-300 text-orange-700 bg-orange-50`}>
+            📚 Est
           </Badge>
         )}
         
